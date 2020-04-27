@@ -165,13 +165,13 @@ class MoveSkill: public Skill{
 
 class attack: public attackSkill,public Unit{
 protected:
-    int randomNumber = rand() % 100;
+    int randomNumber = rand() % 101;
     int hitChange = baseAcc + accMod - dodge;
 public:
     void attackFunc(){
         if(hitChange >= randomNumber){ // saldirir ve crit hesaplamasi yapilir
             int criticalChance = baseCrit + critMod;
-            randomNumber = rand() % 100;
+            randomNumber = rand() % 101;
             if(criticalChance >= randomNumber){ // crit vurur
                 double critHit = maxDmg*1.5;
             }
