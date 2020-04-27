@@ -45,7 +45,7 @@ public:
     }
 };
 class Crusader: public Hero {
-protected:
+public:
     Crusader(string na){
         name = na;
         maxHp = 33;
@@ -63,7 +63,7 @@ protected:
     }
 };
 class Vestal : public Hero{
-protected:
+public:
     Vestal(string na):Hero(){
         name = na;
         maxHp = 24;
@@ -83,10 +83,11 @@ protected:
 };
 
 class Monster: public Unit {
-protected:
+public:
     Monster(){}
 };
 class Bone_Soldier: public Monster{
+public:
     Bone_Soldier(string na):Monster(){
         name = na;
         maxHp = 10;
@@ -103,7 +104,7 @@ class Bone_Soldier: public Monster{
 
 };
 class Bone_Defender:public Monster{
-protected:
+public:
     Bone_Defender(string na):Monster(){
         name = na;
         maxHp = 22;
