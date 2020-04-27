@@ -46,17 +46,18 @@ public:
     int target;
 
 };
-class AttackSkill: public Skill{
+class attackSkill: public Skill{
+protected:
     int dmgMod;
     int baseAcc;
     int critMod;
     string stunEffect;
     int stunBase;
 };
-class Smite: public AttackSkill{
+class Smite: public attackSkill{
 
 };
-class Stunning_Blow: public AttackSkill, public StunSkill{
+class Stunning_Blow: public attackSkill, public StunSkill{
 
 };
 class UtilitySkill: public Skill{
@@ -73,8 +74,26 @@ class MoveSkill: public Skill{
 
 
 
-class attack: public Skill,public Unit{
-
+class attack: public attackSkill,public Unit{
+protected:
+    int randomNumber = rand() % 100;
+    int hitChange = baseAcc + accMod - dodge;
+public:
+    void attackFunc(){
+        if(hitChange >= randomNumber){ // saldirir ve crit hesaplamasi yapilir
+            int criticalChance = baseCrit + critMod;
+            randomNumber = rand() % 100;
+            if(criticalChance >= randomNumber){ // crit vurur
+                double critHit = maxDmg*1.5;
+            }
+            else{
+                int dmg = rand() % maxDmg + minDmg;
+                double rawDmg = dmg*(100 + dmgMod)/100.0;
+                double actualDmg = rawDmg - rawDmg*(prot/100.0);
+            } // normal vurur
+        }
+        else{} // missing
+    }
 };
 
 
