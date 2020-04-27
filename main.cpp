@@ -43,6 +43,17 @@ public:
         cout<<maxHp;
 
     }
+    void dying(){
+        if(maxHp == 0){
+            int randomNumber = rand() % 101;
+            if(deathBlowResist >= randomNumber){
+                //bir sey olmaz hero yasamaya devam eder.
+            }
+            else{
+                //hero olur karakter dummy olarak atanir.
+            }
+        }
+    }
 };
 class Crusader: public Hero {
 public:
@@ -60,6 +71,8 @@ public:
         stunResist = 40;
     }
     void virtual attack(){
+        // attack classi buradan cagirlacak
+
     }
 };
 class Vestal : public Hero{
@@ -83,8 +96,13 @@ public:
 };
 
 class Monster: public Unit {
-public:
+protected:
     Monster(){}
+    void dying(){
+        if(maxHp == 0){
+           // karakter dummy olarak atanir.
+        }
+    }
 };
 class Bone_Soldier: public Monster{
 public:
@@ -128,7 +146,7 @@ class StunSkill{
 
 };
 class Skill{
-public:
+protected:
     int position;
     int target;
 
@@ -163,28 +181,29 @@ class MoveSkill: public Skill{
 
 
 
-class attack: public attackSkill,public Unit{
+class attack: public attackSkill,public Unit {
 protected:
     int randomNumber = rand() % 101;
     int hitChange = baseAcc + accMod - dodge;
 public:
-    void attackFunc(){
-        if(hitChange >= randomNumber){ // saldirir ve crit hesaplamasi yapilir
+    void attackFunc() {
+        int randomNumber = rand() % 101;
+        int hitChange = baseAcc + accMod - dodge;
+        if (hitChange >= randomNumber) { // saldirir ve crit hesaplamasi yapilir
             int criticalChance = baseCrit + critMod;
             randomNumber = rand() % 101;
-            if(criticalChance >= randomNumber){ // crit vurur
-                double critHit = maxDmg*1.5;
-            }
-            else{
+            if (criticalChance >= randomNumber) { // crit vurur
+                double critHit = maxDmg * 1.5;
+            } else {
                 int dmg = rand() % maxDmg + minDmg;
-                double rawDmg = dmg*(100 + dmgMod)/100.0;
-                double actualDmg = rawDmg - rawDmg*(prot/100.0);
+                double rawDmg = dmg * (100 + dmgMod) / 100.0;
+                double actualDmg = rawDmg - rawDmg * (prot / 100.0);
             } // normal vurur
-        }
-        else{} // missing
+        } else {} // missing
     }
-};
 
+
+};
 
 void turnOrder(){
 
