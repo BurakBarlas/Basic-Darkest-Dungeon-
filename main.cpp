@@ -11,6 +11,7 @@ class Unit {
 protected:
     string name;
     int maxHp;
+    int hp;
     int dodge;
     int prot;
     int speed;
@@ -22,15 +23,42 @@ protected:
 public:
     Unit(){
     }
-    void virtual attack(){}
 
-    int getSpeed(){
+    void virtual dying() {}
+
+    int getDodge() {
+        return dodge;
+    }
+    int getProt(){
+        return prot;
+    }
+    int getSpeed() {
         return speed;
     }
-    string getName(){
+    string getName() {
         return name;
     }
+    int getAccMod() {
+        return accMod;
+    }
+    int getBaseCrit(){
+        return baseCrit;
+    }
+    int getMaxDmg() {
+        return maxDmg;
+    }
+    int getMinDmg() {
+        return minDmg;
+    }
 
+
+    void getDamage(int damage) {
+        hp = hp - damage;
+        if(hp <= 0){
+            hp = 0;
+            dying();
+        }
+    }
 };
 class Hero: public Unit{
 protected:
@@ -43,8 +71,11 @@ public:
         cout<<maxHp;
 
     }
+    void attack() {
+
+    }
     void dying(){
-        if(maxHp == 0){
+        if(hp == 0){
             int randomNumber = rand() % 101;
             if(deathBlowResist >= randomNumber){
                 //bir sey olmaz hero yasamaya devam eder.
@@ -99,9 +130,9 @@ class Monster: public Unit {
 protected:
     Monster(){}
     void dying(){
-        if(maxHp == 0){
+
            // karakter dummy olarak atanir.
-        }
+
     }
 };
 class Bone_Soldier: public Monster{
@@ -149,7 +180,10 @@ class Skill{
 protected:
     int position;
     int target;
-
+public:
+    int getPosition() {
+        return position;
+    }
 };
 class attackSkill: public Skill{
 protected:
@@ -158,6 +192,37 @@ protected:
     int critMod;
     string stunEffect;
     int stunBase;
+public:
+    void attackFunc(Unit attacker, Unit defender, Skill attack) {
+        int randomNumber = rand() % 101;
+        int hitChange = baseAcc + attacker.getAccMod() - defender.getDodge();
+        if (hitChange >= randomNumber) { // saldirir ve crit hesaplamasi yapilir
+            int criticalChance = attacker.getBaseCrit() + critMod;
+            randomNumber = rand() % 101;
+            if (criticalChance >= randomNumber) { // crit vurur
+                double critHit = attacker.getMaxDmg() * 1.5;
+                defender.getDamage(critHit);
+            }
+            else {
+                int dmg = rand() % attacker.getMaxDmg() + attacker.getMinDmg();
+                double rawDmg = dmg * (100 + dmgMod) / 100.0;
+                double actualDmg = rawDmg - rawDmg * (defender.getProt() / 100.0);
+            } // normal vurur
+        } else {
+            cout << "missing"; // missing
+        }
+    }
+    int getDmgMod(){
+        return dmgMod;
+    }
+    int getBaseAcc(){
+        return baseAcc;
+    }
+    int getCritMod() {
+        return critMod;
+    }
+
+
 
 
 };
@@ -181,33 +246,7 @@ class MoveSkill: public Skill{
 
 
 
-class attack: public attackSkill,public Unit {
-protected:
-    int randomNumber = rand() % 101;
-    int hitChange = baseAcc + accMod - dodge;
-public:
-    void attackFunc() {
-        int randomNumber = rand() % 101;
-        int hitChange = baseAcc + accMod - dodge;
-        if (hitChange >= randomNumber) { // saldirir ve crit hesaplamasi yapilir
-            int criticalChance = baseCrit + critMod;
-            randomNumber = rand() % 101;
-            if (criticalChance >= randomNumber) { // crit vurur
-                double critHit = maxDmg * 1.5;
-            } else {
-                int dmg = rand() % maxDmg + minDmg;
-                double rawDmg = dmg * (100 + dmgMod) / 100.0;
-                double actualDmg = rawDmg - rawDmg * (prot / 100.0);
-            } // normal vurur
-        } else {} // missing
-    }
 
-
-};
-
-void turnOrder(){
-
-}
 
 
 int main() {
