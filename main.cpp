@@ -25,7 +25,9 @@ public:
     }
 
     void virtual dying() {}
-
+    string getName() {
+        return name;
+    }
     int getDodge() {
         return dodge;
     }
@@ -35,21 +37,19 @@ public:
     int getSpeed() {
         return speed;
     }
-    string getName() {
-        return name;
-    }
     int getAccMod() {
         return accMod;
     }
     int getBaseCrit(){
         return baseCrit;
     }
-    int getMaxDmg() {
-        return maxDmg;
-    }
     int getMinDmg() {
         return minDmg;
     }
+    int getMaxDmg() {
+        return maxDmg;
+    }
+
 
 
     void getDamage(int damage) {
@@ -181,9 +181,7 @@ protected:
     int position;
     int target;
 public:
-    int getPosition() {
-        return position;
-    }
+
 };
 class attackSkill: public Skill{
 protected:
@@ -221,9 +219,6 @@ public:
     int getCritMod() {
         return critMod;
     }
-
-
-
 
 };
 class Smite: public attackSkill{
