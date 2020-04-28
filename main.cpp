@@ -28,6 +28,9 @@ public:
     string getName() {
         return name;
     }
+    int getHp(){
+        return hp;
+    }
     int getDodge() {
         return dodge;
     }
@@ -48,6 +51,14 @@ public:
     }
     int getMaxDmg() {
         return maxDmg;
+    }
+
+    void setName(string nam){
+    name = nam;
+    }
+
+    void setSpeed(int sped){
+    speed = sped;
     }
 
 
@@ -434,8 +445,8 @@ do {
 
 
 
-if(heroes[0].getMaxHp()+heroes[1].getMaxHp()+heroes[2].getMaxHp()+heroes[3].getMaxHp() == 0 ||
-   monsters[0].getMaxHp()+monsters[1].getMaxHp()+monsters[2].getMaxHp()+monsters[3].getMaxHp() == 0){
+if(heroes[0].getHp()+heroes[1].getHp()+heroes[2].getHp()+heroes[3].getHp() == 0 ||
+   monsters[0].getHp()+monsters[1].getHp()+monsters[2].getHp()+monsters[3].getHp() == 0){
     gameover = true;
    }
 
