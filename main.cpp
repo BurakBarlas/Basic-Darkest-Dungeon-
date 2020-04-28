@@ -277,24 +277,34 @@ int main() {
     Vestal secondVestal("Vestal #2");
     Crusader firstCrusader("Crusader #1");
     Crusader secondCrusader("Crusader #2");
-    Bone_Defender firsBoneD("Bone Defender #1");
+    Bone_Defender firstBoneD("Bone Defender #1");
     Bone_Defender secondBoneD("Bone Defender #2");
     Bone_Soldier firstBoneS("Bone Soldier #1");
     Bone_Soldier secondBoneS("Bone Soldier #2");
 
+
+
     Unit attackOrderArray[8];attackOrderArray[0] = secondVestal;attackOrderArray[1] = firstVestal;
     attackOrderArray[2] = secondCrusader;attackOrderArray[3] = firstCrusader;attackOrderArray[4] = firstBoneS;
-    attackOrderArray[5] = firsBoneD;attackOrderArray[6] = secondBoneS;attackOrderArray[7] = secondBoneD;
+    attackOrderArray[5] = firstBoneD;attackOrderArray[6] = secondBoneS;attackOrderArray[7] = secondBoneD;
 
-    Unit temp;
-    for(int i=0;i<8;i++)
-        for(int j=0;j<8;j++){
+    int speedtemp = 0;
+    Crusader temp("temp");
+	for(int i=0;i<8;i++)
+		for(int j=0;j<8;j++){
             if(attackOrderArray[j].getSpeed() + randSpeeds[j] >attackOrderArray[j+1].getSpeed() + randSpeeds[j+1]){
-                temp=attackOrderArray[j];
-                attackOrderArray[j]=attackOrderArray[j+1];
-                attackOrderArray[j+1]=temp;
-            }
-        }
+                temp.setName(attackOrderArray[j].getName());
+                temp.setSpeed(attackOrderArray[j].getSpeed());
+                attackOrderArray[j].setName(attackOrderArray[j+1].getName());
+                attackOrderArray[j].setSpeed(attackOrderArray[j+1].getSpeed());
+                attackOrderArray[j+1].setName(temp.getName());
+                attackOrderArray[j+1].setSpeed(temp.getSpeed());
+
+                speedtemp = randSpeeds[j];
+                randSpeeds[j] = randSpeeds[j+1];
+                randSpeeds[j+1] = speedtemp;
+		}
+	}
 
 
     vector<Hero>heroes;
@@ -306,59 +316,114 @@ int main() {
     vector<Monster>::iterator monsterPtr;
     monsterPtr = monsters.begin();
 
+    heroes.push_back(secondVestal);heroes.push_back(firstVestal);heroes.push_back(secondCrusader);heroes.push_back(firstCrusader);
+    monsters.push_back(firstBoneS);monsters.push_back(firstBoneD);monsters.push_back(secondBoneS);monsters.push_back(secondBoneD);
 
+    int numberOfRound = 1;
     int numberOfSkill;
     bool gameover = false;
-    do {
-        cout<<attackOrderArray[0].getName()<<endl;cout<<"'s turn! Select a skill!"<<endl;
-        cout<<"--------------------------------"<<endl;
-        if(attackOrderArray[0].getName() == "Vestal #1"||attackOrderArray[0].getName() == "Vestal #2"){
-            cout<<"1 : Mace Bash (Attack)"<<endl;
-            cout<<"2 : Dazzling Light (Attack)"<<endl;
-            cout<<"3 : Divine Grace (Utility)"<<endl;
-            cout<<"4 : Divine Comfort (Utility)"<<endl;
-            cout<<"--------------------------------"<<endl;
-            cout<<"Number of Skill : ";
-            cin>>numberOfSkill;
-            if(numberOfSkill == 1){
-                cout<<"Mace Bash Selected!"<<endl;
-            }
-            else if(numberOfSkill == 2){
-                cout<<"Dazzling Light Selected!"<<endl;
-            }
-            else if(numberOfSkill == 3){
-                cout<<"Divine Grace Selected!"<<endl;
-            }
-            else if(numberOfSkill == 4){
-                cout<<"Divine Comfort Selected!"<<endl;
-            }
+do {
+    cout<<"---R O U N D  "<<numberOfRound<<"---"<<endl;
+    cout<<endl;
+
+    for(int i = 7;i>=0;i--){
+
+        cout<<attackOrderArray[i].getName()<<"'s turn! "<<"Select a skill!"<<endl;
+        /*for(int j = 0;j<8;j++){
+            cout<<attackOrderArray[j].getName()<<" ";
+            cout<<attackOrderArray[j].getSpeed()+randSpeeds[j]<<endl;
+
+        }*//*Test için duruyor*/
+        if(attackOrderArray[i].getName() == "Vestal #1"||attackOrderArray[i].getName() == "Vestal #2"){
+        cout<<"1 : Mace Bash (Attack)"<<endl;
+        cout<<"2 : Dazzling Light (Attack)"<<endl;
+        cout<<"3 : Divine Grace (Utility)"<<endl;
+        cout<<"4 : Divine Comfort (Utility)"<<endl;
+        cout<<"Number of Skill : ";
+        cin>>numberOfSkill;
+        if(numberOfSkill == 1){
+            cout<<"Mace Bash Selected!"<<endl;
+        }
+        else if(numberOfSkill == 2){
+            cout<<"Dazzling Light Selected!"<<endl;
+        }
+        else if(numberOfSkill == 3){
+            cout<<"Divine Grace Selected!"<<endl;
+        }
+        else if(numberOfSkill == 4){
+            cout<<"Divine Comfort Selected!"<<endl;
+        }
+        cout<<"----------------------------------------"<<endl;
         }
 
-        else if(attackOrderArray[0].getName() == "Crusader #1"||attackOrderArray[0].getName() == "Crusader #2"){
-            cout<<"1 : Smite (Attack)"<<endl;
-            cout<<"2 : Stunning Blow (Attack)"<<endl;
-            cout<<"3 : Holy Lance (Attack)"<<endl;
-            cout<<"4 : Bulwark of Faith (Utility)"<<endl;
-            cout<<"--------------------------------"<<endl;
-            cout<<"Number of Skill : ";
-            cin>>numberOfSkill;
+        else if(attackOrderArray[i].getName() == "Crusader #1"||attackOrderArray[i].getName() == "Crusader #2"){
+        cout<<"1 : Smite (Attack)"<<endl;
+        cout<<"2 : Stunning Blow (Attack)"<<endl;
+        cout<<"3 : Holy Lance (Attack)"<<endl;
+        cout<<"4 : Bulwark of Faith (Utility)"<<endl;
+        cout<<"Number of Skill : ";
+        cin>>numberOfSkill;
 
-            if(numberOfSkill == 1){
-                cout<<"Smite Selected!"<<endl;
+        if(numberOfSkill == 1){
+            int target;
+            cout<<"Smite Selected!"<<endl;
+            cout<<"Select a target to attack!"<<endl;
+            cout<<"1-"<<monsters[0].getName()<<endl;
+            cout<<"2-"<<monsters[1].getName()<<endl;
+            cout<<"Number of Target : ";
+            cin>>target;
+            cout<<"Using Smite on "<<monsters[target-1].getName()<<endl;
+        }
+        else if(numberOfSkill == 2){
+            cout<<"Stunning Blow Selected!"<<endl;
+        }
+        else if(numberOfSkill == 3){
+            cout<<"Holy Lance Selected!"<<endl;
+        }
+        else if(numberOfSkill == 4){
+            cout<<"Bulwark of Faith Selected!"<<endl;
+        }
+        cout<<"----------------------------------------"<<endl;
+        }
+
+        else if(attackOrderArray[i].getName()=="Bone Defender #1"||attackOrderArray[i].getName() == "Bone Defender #2"){
+
+            int numOfSkill = rand() % 3 + 1;
+            int target = rand() % 2 + 1;
+            int healMonster = rand() % 4 + 1;
+            int randHealAmount = rand() % 1 + 3;
+            if(numOfSkill==1){
+                cout<<attackOrderArray[i].getName()<<" is selected AxeBlade to attack to "<<heroes[4-target].getName()<<endl;
             }
-            else if(numberOfSkill == 2){
-                cout<<"Stunning Blow Selected!"<<endl;
+            else if(numOfSkill==2){
+                cout<<attackOrderArray[i].getName()<<" is selected Dead Weight to attack to "<<heroes[4-target].getName()<<endl;
             }
-            else if(numberOfSkill == 3){
-                cout<<"Holy Lance Selected!"<<endl;
+            else if(numOfSkill==3){
+                cout<<attackOrderArray[i].getName()<<" is selected Knitting Bones to heal to "<<monsters[healMonster].getName()<<" by " <<randHealAmount<<endl;
             }
-            else if(numberOfSkill == 4){
-                cout<<"Bulwark of Faith Selected!"<<endl;
+            cout<<"----------------------------------------"<<endl;
+
+        }
+
+        else if(attackOrderArray[i].getName()=="Bone Soldier #1"||attackOrderArray[i].getName() == "Bone Soldier #2"){
+
+            int numOfSkill = rand() % 2 + 1;
+            int target = rand() % 2 + 1;
+            int target2 = rand() % 3 + 1;
+
+            if(numOfSkill==1){
+                cout<<attackOrderArray[i].getName()<<" is selected Graveyard Slash to attack to "<<heroes[4-target2].getName()<<endl;
             }
+            else if(numOfSkill==2){
+                cout<<attackOrderArray[i].getName()<<" is selected Dead Weight to attack to "<<heroes[4-target].getName()<<endl;
+                cout<<"And "<<attackOrderArray[i].getName()<<" moves 1 step forward!"<<endl;
+            }
+            cout<<"----------------------------------------"<<endl;
         }
 
 
 
+    }
 
 
 
@@ -369,14 +434,16 @@ int main() {
 
 
 
+if(heroes[0].getMaxHp()+heroes[1].getMaxHp()+heroes[2].getMaxHp()+heroes[3].getMaxHp() == 0 ||
+   monsters[0].getMaxHp()+monsters[1].getMaxHp()+monsters[2].getMaxHp()+monsters[3].getMaxHp() == 0){
+    gameover = true;
+   }
+
+numberOfRound++;
+
+} while (gameover == false);
 
 
-
-
-
-        gameover = 1;
-
-    } while (gameover == false);
 
     return 0;
 }
