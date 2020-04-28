@@ -112,6 +112,23 @@ public:
         deathBlowResist=67;
         stunResist = 40;
     }
+    void useSkill(int choice){
+        if(choice == 1){
+            //Smite
+        }
+        else if(choice == 2){
+            //stunning blow
+        }
+        else if(choice == 3){
+            //hooly lance
+        }
+        else if(choice == 4){
+            //bulwark of faith
+        }
+        else{
+
+        }
+    }
     void virtual attack(){
         // attack classi buradan cagirlacak
 
@@ -132,7 +149,23 @@ public:
         deathBlowResist = 77;
         stunResist = 30;
     }
+    void useSkill(int choice){
+        if(choice == 1){
+            //Mace Bash
+        }
+        else if(choice == 2){
+            //Dazzling Light
+        }
+        else if(choice == 3){
+            //Divine Grace
+        }
+        else if(choice == 4){
+            //Divine comfort
+        }
+        else{
 
+        }
+    }
 
 
 };
@@ -142,7 +175,7 @@ protected:
     Monster(){}
     void dying(){
 
-           // karakter dummy olarak atanir.
+        // karakter dummy olarak atanir.
 
     }
 };
@@ -160,7 +193,17 @@ public:
         maxDmg = 8;
         stunResist = 25;
     }
+    void useSkill(int choice){
+        if(choice == 1){
+            //graveyard slash
+        }
+        else if(choice == 2){
+            //graveyard stumble
+        }
+        else{
 
+        }
+    }
 
 };
 class Bone_Defender:public Monster{
@@ -177,21 +220,38 @@ public:
         maxDmg = 4;
         stunResist = 45;
     }
+    void useSkill(int choice){
+        if(choice == 1){
+            //Axeblade
+        }
+        else if(choice == 2){
+            //Dead weight
+        }
+        else if(choice == 3){
+            //Knitting Bones
+        }
+        else{
 
+        }
+    }
 };
 
 
 
 
 class StunSkill{
+protected:
     StunSkill();
 
 };
-class Skill{
+class Skill {
 protected:
     int position;
     int target;
 public:
+
+};
+class MoveSkill: public Skill{
 
 };
 class attackSkill: public Skill{
@@ -202,25 +262,6 @@ protected:
     string stunEffect;
     int stunBase;
 public:
-    void attackFunc(Unit attacker, Unit defender, Skill attack) {
-        int randomNumber = rand() % 101;
-        int hitChange = baseAcc + attacker.getAccMod() - defender.getDodge();
-        if (hitChange >= randomNumber) { // saldirir ve crit hesaplamasi yapilir
-            int criticalChance = attacker.getBaseCrit() + critMod;
-            randomNumber = rand() % 101;
-            if (criticalChance >= randomNumber) { // crit vurur
-                double critHit = attacker.getMaxDmg() * 1.5;
-                defender.getDamage(critHit);
-            }
-            else {
-                int dmg = rand() % attacker.getMaxDmg() + attacker.getMinDmg();
-                double rawDmg = dmg * (100 + dmgMod) / 100.0;
-                double actualDmg = rawDmg - rawDmg * (defender.getProt() / 100.0);
-            } // normal vurur
-        } else {
-            cout << "missing"; // missing
-        }
-    }
     int getDmgMod(){
         return dmgMod;
     }
@@ -231,25 +272,126 @@ public:
         return critMod;
     }
 
+    attackSkill(int dmgMod, int baseAcc,int critMod, int stunBase): dmgMod(this->dmgMod), baseAcc(this->baseAcc), critMod(this->critMod),stunBase(this->stunBase){}
+
+    void attackFunc(Unit attacker, Unit defender, attackSkill attack) {
+            int randomNumber = rand() % 101;
+            int hitChange = attack.baseAcc + attacker.getAccMod() - defender.getDodge();
+
+            if (hitChange >= randomNumber) { // saldirir ve crit hesaplamasi yapilir
+                int criticalChance = attacker.getBaseCrit() + attack.critMod;
+                randomNumber = rand() % 101;
+
+                if (criticalChance >= randomNumber) { // crit vurur
+                    double critHit = attacker.getMaxDmg() * 1.5;
+                    defender.getDamage(critHit);
+                }
+                else {
+                    int dmg = rand() % attacker.getMaxDmg() + attacker.getMinDmg();
+                    double rawDmg = dmg * (100 + attack.dmgMod) / 100.0;
+                    double actualDmg = rawDmg - rawDmg * (defender.getProt() / 100.0);
+                } // normal vurur
+            } else {
+                cout << "missing"; // missing
+            }
+    }
+
+
 };
 class Smite: public attackSkill{
+public:
+    Smite(int dmgMod, int baseAcc, int critMod, int stunBase): attackSkill(dmgMod, baseAcc, critMod, stunBase){
+        dmgMod = 0;
+        baseAcc = 85;
+        critMod = 0;
+    }
 
 };
 class Stunning_Blow: public attackSkill, public StunSkill{
-
+public:
+    Stunning_Blow(int dmgMod, int baseAcc, int critMod, int stunBase): attackSkill(dmgMod, baseAcc, critMod, stunBase){
+        dmgMod = -50;
+        baseAcc = 90;
+        critMod = 0;
+        stunBase = 100;
+    }
+};
+class Holy_Lance: public attackSkill, public MoveSkill{
+public:
+    Holy_Lance(int dmgMod, int baseAcc, int critMod, int stunBase): attackSkill(dmgMod, baseAcc, critMod, stunBase){
+        dmgMod = 0;
+        baseAcc = 85;
+        critMod = 6.5;
+    }
+};
+class Mace_Bash: public attackSkill{
+public:
+    Mace_Bash(int dmgMod, int baseAcc, int critMod, int stunBase): attackSkill(dmgMod, baseAcc, critMod, stunBase){
+        dmgMod = 0;
+        baseAcc = 85;
+        critMod = 0;
+    }
+};
+class Dazzling_Light: public attackSkill, public StunSkill{
+public:
+    Dazzling_Light(int dmgMod, int baseAcc, int critMod, int stunBase): attackSkill(dmgMod, baseAcc, critMod, stunBase){
+        dmgMod = -75;
+        baseAcc = 90;
+        critMod = 5;
+        stunBase = 100;
+    }
+};
+class Graveyard_Slash: public attackSkill{
+public:
+    Graveyard_Slash(int dmgMod, int baseAcc, int critMod, int stunBase): attackSkill(dmgMod, baseAcc, critMod, stunBase){
+        dmgMod = 0;
+        baseAcc = 85;
+        critMod = 6;
+    }
+};
+class Graveyard_Stumble: public attackSkill, public MoveSkill{
+public:
+    Graveyard_Stumble(int dmgMod, int baseAcc, int critMod, int stunBase): attackSkill(dmgMod, baseAcc, critMod, stunBase){
+        dmgMod = -50;
+        baseAcc = 45;
+        critMod = 0;
+    }
+};
+class Axeblade: public attackSkill{
+public:
+    Axeblade(int dmgMod, int baseAcc, int critMod, int stunBase): attackSkill(dmgMod, baseAcc, critMod, stunBase){
+        dmgMod = 0;
+        baseAcc = 72;
+        critMod = 6;
+    }
+};
+class Dead_Weight: public attackSkill, public StunSkill{
+public:
+    Dead_Weight(int dmgMod, int baseAcc, int critMod, int stunBase): attackSkill(dmgMod, baseAcc, critMod, stunBase){
+        dmgMod = -25;
+        baseAcc = 82;
+        critMod = 6;
+        stunBase = 100;
+    }
 };
 class UtilitySkill: public Skill{
     int position;
     string Target;
     // string effect gelecek +20 Prot for 3 round
 };
+
+class Bulwark_Of_Faith: public UtilitySkill{
+
+};
 class Divine_Grace: public UtilitySkill{
 
 };
-class MoveSkill: public Skill{
+class Divine_Comfort: public UtilitySkill{
 
 };
+class Knitting_Bones: public UtilitySkill{
 
+};
 
 
 
