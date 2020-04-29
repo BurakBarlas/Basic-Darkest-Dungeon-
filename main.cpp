@@ -10,6 +10,7 @@ using namespace std;
 class Unit {
 protected:
     string name;
+    int position;
     int maxHp;
     int hp;
     int dodge;
@@ -53,12 +54,20 @@ public:
         return maxDmg;
     }
 
+    int getPosition() {
+        return position;
+    }
+
     void setName(string nam){
     name = nam;
     }
 
     void setSpeed(int sped){
     speed = sped;
+    }
+
+    void setPosition(int pst){
+    position = pst;
     }
 
     bool isAlive() {
@@ -102,9 +111,11 @@ public:
 };
 class Crusader: public Hero {
 public:
-    Crusader(string na){
+    Crusader(string na,int pst){
         name = na;
+        position = pst;
         maxHp = 33;
+        hp = 33;
         dodge = 5;
         prot = 0;
         speed = 1;
@@ -139,9 +150,11 @@ public:
 };
 class Vestal : public Hero{
 public:
-    Vestal(string na):Hero(){
+    Vestal(string na,int pst):Hero(){
         name = na;
+        position = pst;
         maxHp = 24;
+        hp = 24;
         dodge = 0;
         prot = 0;
         speed = 4;
@@ -184,9 +197,11 @@ protected:
 };
 class Bone_Soldier: public Monster{
 public:
-    Bone_Soldier(string na):Monster(){
+    Bone_Soldier(string na,int pst):Monster(){
         name = na;
+        position = pst;
         maxHp = 10;
+        hp = 10;
         dodge = 10;
         prot = 15;
         speed = 2;
@@ -211,9 +226,11 @@ public:
 };
 class Bone_Defender:public Monster{
 public:
-    Bone_Defender(string na):Monster(){
+    Bone_Defender(string na,int pst):Monster(){
         name = na;
+        position = pst;
         maxHp = 22;
+        hp = 22;
         dodge = 8;
         prot = 45;
         speed = 1;
@@ -244,7 +261,7 @@ public:
 
 class StunSkill{
 protected:
-    StunSkill();
+    StunSkill(){}
 
 };
 class Skill {
@@ -262,19 +279,19 @@ class AttackSkill: public Skill{
 protected:
     int dmgMod;
     int baseAcc;
-    int critMod;
+    double critMod;
     string stunEffect;
     int stunBase;
 public:
 
-    AttackSkill(int dmgMod, int baseAcc, int critMod, int stunBase): dmgMod(this->dmgMod), baseAcc(this->baseAcc), critMod(this->critMod), stunBase(this->stunBase){}
+    AttackSkill(){}
 
     void attackFunc(Unit attacker, Unit defender) {
             int randomNumber = rand() % 101;
             int hitChange = baseAcc + attacker.getAccMod() - defender.getDodge();
 
             if (hitChange >= randomNumber) { // saldirir ve crit hesaplamasi yapilir
-                int criticalChance = attacker.getBaseCrit() + critMod;
+                double criticalChance = attacker.getBaseCrit() + critMod;
                 randomNumber = rand() % 101;
 
                 if (criticalChance >= randomNumber) { // crit vurur
@@ -304,7 +321,7 @@ public:
 };
 class Smite: public AttackSkill{
 public:
-    Smite(int dmgMod, int baseAcc, int critMod, int stunBase): AttackSkill(dmgMod, baseAcc, critMod, stunBase){
+    Smite(){
         dmgMod = 0;
         baseAcc = 85;
         critMod = 0;
@@ -313,7 +330,7 @@ public:
 };
 class Stunning_Blow: public AttackSkill, public StunSkill{
 public:
-    Stunning_Blow(int dmgMod, int baseAcc, int critMod, int stunBase): AttackSkill(dmgMod, baseAcc, critMod, stunBase){
+    Stunning_Blow(){
         dmgMod = -50;
         baseAcc = 90;
         critMod = 0;
@@ -322,7 +339,7 @@ public:
 };
 class Holy_Lance: public AttackSkill, public MoveSkill{
 public:
-    Holy_Lance(int dmgMod, int baseAcc, int critMod, int stunBase): AttackSkill(dmgMod, baseAcc, critMod, stunBase){
+    Holy_Lance(){
         dmgMod = 0;
         baseAcc = 85;
         critMod = 6.5;
@@ -330,7 +347,7 @@ public:
 };
 class Mace_Bash: public AttackSkill{
 public:
-    Mace_Bash(int dmgMod, int baseAcc, int critMod, int stunBase): AttackSkill(dmgMod, baseAcc, critMod, stunBase){
+    Mace_Bash(){
         dmgMod = 0;
         baseAcc = 85;
         critMod = 0;
@@ -338,7 +355,7 @@ public:
 };
 class Dazzling_Light: public AttackSkill, public StunSkill{
 public:
-    Dazzling_Light(int dmgMod, int baseAcc, int critMod, int stunBase): AttackSkill(dmgMod, baseAcc, critMod, stunBase){
+    Dazzling_Light(){
         dmgMod = -75;
         baseAcc = 90;
         critMod = 5;
@@ -347,7 +364,7 @@ public:
 };
 class Graveyard_Slash: public AttackSkill{
 public:
-    Graveyard_Slash(int dmgMod, int baseAcc, int critMod, int stunBase): AttackSkill(dmgMod, baseAcc, critMod, stunBase){
+    Graveyard_Slash(){
         dmgMod = 0;
         baseAcc = 85;
         critMod = 6;
@@ -355,7 +372,7 @@ public:
 };
 class Graveyard_Stumble: public AttackSkill, public MoveSkill{
 public:
-    Graveyard_Stumble(int dmgMod, int baseAcc, int critMod, int stunBase): AttackSkill(dmgMod, baseAcc, critMod, stunBase){
+    Graveyard_Stumble(){
         dmgMod = -50;
         baseAcc = 45;
         critMod = 0;
@@ -363,7 +380,7 @@ public:
 };
 class Axeblade: public AttackSkill{
 public:
-    Axeblade(int dmgMod, int baseAcc, int critMod, int stunBase): AttackSkill(dmgMod, baseAcc, critMod, stunBase){
+    Axeblade(){
         dmgMod = 0;
         baseAcc = 72;
         critMod = 6;
@@ -371,7 +388,7 @@ public:
 };
 class Dead_Weight: public AttackSkill, public StunSkill{
 public:
-    Dead_Weight(int dmgMod, int baseAcc, int critMod, int stunBase): AttackSkill(dmgMod, baseAcc, critMod, stunBase){
+    Dead_Weight(){
         dmgMod = -25;
         baseAcc = 82;
         critMod = 6;
@@ -429,14 +446,35 @@ int main() {
 
     int randSpeeds[8] = {randSpeed,randSpeed2,randSpeed3,randSpeed4,randSpeed5,randSpeed6,randSpeed7,randSpeed8};
 
-    Vestal firstVestal("Vestal #1");
-    Vestal secondVestal("Vestal #2");
-    Crusader firstCrusader("Crusader #1");
-    Crusader secondCrusader("Crusader #2");
-    Bone_Defender firstBoneD("Bone Defender #1");
-    Bone_Defender secondBoneD("Bone Defender #2");
-    Bone_Soldier firstBoneS("Bone Soldier #1");
-    Bone_Soldier secondBoneS("Bone Soldier #2");
+    Vestal firstVestal("Vestal #1",3);
+    Vestal secondVestal("Vestal #2",4);
+    Crusader firstCrusader("Crusader #1",1);
+    Crusader secondCrusader("Crusader #2",2);
+    Bone_Defender firstBoneD("Bone Defender #1",2);
+    Bone_Defender secondBoneD("Bone Defender #2",4);
+    Bone_Soldier firstBoneS("Bone Soldier #1",1);
+    Bone_Soldier secondBoneS("Bone Soldier #2",3);
+
+    //Crusader Skills
+    Smite Skill_Smite;//Attack
+    Stunning_Blow Skill_Stunning_Blow;//Attack
+    Holy_Lance Holy_Lance;//Attack + Move
+    Bulwark_Of_Faith Skill_Bulwark_Of_Faith;//Utility
+    //Vestal Skills
+    Mace_Bash Skill_Mace_Bash;//Attack
+    Dazzling_Light Skill_Dazzling_Light;//Attack
+    Divine_Grace Skill_Divine_Grace;//Utility (Heal)
+    Divine_Comfort Skill_Divine_Comfort;//Utility (Heal)
+    //Bone Soldier Skills
+    Graveyard_Slash Skill_Graveyard_Slash;//Attack
+    Graveyard_Stumble Skill_Graveyard_Stumble;//Attack + Move
+    //Bone Defender Skills
+    Axeblade Skill_Axeblade;//Attack
+    Dead_Weight Dead_Weight;//Attack
+    Knitting_Bones Skill_Knitting_Bones;//Utility (Heal)
+
+
+
 
 
     Unit attackOrderArray[8];attackOrderArray[0] = secondVestal;attackOrderArray[1] = firstVestal;
@@ -444,17 +482,19 @@ int main() {
     attackOrderArray[5] = firstBoneD;attackOrderArray[6] = secondBoneS;attackOrderArray[7] = secondBoneD;
 
     int speedtemp = 0;
-    Crusader temp("temp");
+    Crusader temp("temp",0);
 	for(int i=0;i<8;i++)
 		for(int j=0;j<8;j++){
             if(attackOrderArray[j].getSpeed() + randSpeeds[j] >attackOrderArray[j+1].getSpeed() + randSpeeds[j+1]){
                 temp.setName(attackOrderArray[j].getName());
                 temp.setSpeed(attackOrderArray[j].getSpeed());
+                temp.setPosition(attackOrderArray[j].getPosition());
                 attackOrderArray[j].setName(attackOrderArray[j+1].getName());
                 attackOrderArray[j].setSpeed(attackOrderArray[j+1].getSpeed());
+                attackOrderArray[j].setPosition(attackOrderArray[j+1].getPosition());
                 attackOrderArray[j+1].setName(temp.getName());
                 attackOrderArray[j+1].setSpeed(temp.getSpeed());
-
+                attackOrderArray[j+1].setPosition(temp.getPosition());
                 speedtemp = randSpeeds[j];
                 randSpeeds[j] = randSpeeds[j+1];
                 randSpeeds[j+1] = speedtemp;
@@ -490,53 +530,164 @@ do {
 
         }*//*Test için duruyor*/
         if(attackOrderArray[i].getName() == "Vestal #1"||attackOrderArray[i].getName() == "Vestal #2"){
-        cout<<"1 : Mace Bash (Attack)"<<endl;
-        cout<<"2 : Dazzling Light (Attack)"<<endl;
-        cout<<"3 : Divine Grace (Utility)"<<endl;
-        cout<<"4 : Divine Comfort (Utility)"<<endl;
-        cout<<"Number of Skill : ";
-        cin>>numberOfSkill;
+        if(attackOrderArray[i].getPosition() == 1){
+            int target;
+            cout<<"1 : Mace Bash (Attack)"<<endl;
+            cout<<attackOrderArray[i].getName()<<" at Position 1"<<endl;
+            cout<<"Mace Bash Selected automatically!"<<endl;
+            cout<<"Select a target to attack!"<<endl;
+            cout<<"1-"<<monsters[0].getName()<<"("<<monsters[0].getHp()<<")"<<endl;
+            cout<<"2-"<<monsters[1].getName()<<"("<<monsters[1].getHp()<<")"<<endl;
+            cout<<"Number of Target : ";
+            cin>>target;
+            cout<<"Using Mace Bash to attack to "<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
+
+        }
+        else if(attackOrderArray[i].getPosition() == 2){
+            cout<<"1 : Mace Bash (Attack)"<<endl;
+            cout<<"2 : Dazzling Light (Attack)"<<endl;
+            cout<<"4 : Divine Comfort (Utility)"<<endl;
+            cout<<"Number of Skill : ";
+            cin>>numberOfSkill;
+            if(numberOfSkill==3){
+                cout<<"Number of Skill selected 4 automatically because your selection is not an option! "<<endl;
+                numberOfSkill = 4;
+
+            }
+
+        }
+        else if(attackOrderArray[i].getPosition() == 3 || attackOrderArray[i].getPosition() == 4){
+            cout<<"2 : Dazzling Light (Attack)"<<endl;
+            cout<<"3 : Divine Grace (Utility)"<<endl;
+            cout<<"4 : Divine Comfort (Utility)"<<endl;
+            cout<<"Number of Skill : ";
+            cin>>numberOfSkill;
+            if(numberOfSkill==1){
+                cout<<"Number of Skill selected 2 automatically because your selection is not an option! "<<endl;
+                numberOfSkill = 2;
+
+            }
+
+        }
+
         if(numberOfSkill == 1){
+            int target;
             cout<<"Mace Bash Selected!"<<endl;
+            cout<<"Select a target to attack!"<<endl;
+            cout<<"1-"<<monsters[0].getName()<<"(Hp : "<<monsters[0].getHp()<<")"<<endl;
+            cout<<"2-"<<monsters[1].getName()<<"(Hp : "<<monsters[1].getHp()<<")"<<endl;
+            cout<<"Number of Target : ";
+            cin>>target;
+            if(target==3||target==4){
+                cout<<"Number of Target selected 1 automatically because your selection is not an option! "<<endl;
+                target = 1;
+
+            }
+            cout<<"Using Mace Bash to attack to "<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
         }
         else if(numberOfSkill == 2){
+            int target;
             cout<<"Dazzling Light Selected!"<<endl;
+            cout<<"Select a target to attack!"<<endl;
+            cout<<"1-"<<monsters[0].getName()<<"(Hp : "<<monsters[0].getHp()<<")"<<endl;
+            cout<<"2-"<<monsters[1].getName()<<"(Hp : "<<monsters[1].getHp()<<")"<<endl;
+            cout<<"3-"<<monsters[2].getName()<<"(Hp : "<<monsters[2].getHp()<<")"<<endl;
+            cout<<"Number of Target : ";
+            cin>>target;
+            if(target==4){
+                cout<<"Number of Target selected 1 automatically because your selection is not an option! "<<endl;
+                target = 1;
+
+            }
+            cout<<"Using Mace Bash to attack to "<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
         }
         else if(numberOfSkill == 3){
+            int target;
             cout<<"Divine Grace Selected!"<<endl;
+            cout<<"Select a target to heal!"<<endl;
+            cout<<"1-"<<heroes[0].getName()<<"(Hp : "<<heroes[0].getHp()<<")"<<endl;
+            cout<<"2-"<<heroes[1].getName()<<"(Hp : "<<heroes[1].getHp()<<")"<<endl;
+            cout<<"3-"<<heroes[2].getName()<<"(Hp : "<<heroes[2].getHp()<<")"<<endl;
+            cout<<"4-"<<heroes[3].getName()<<"(Hp : "<<heroes[3].getHp()<<")"<<endl;
+            cout<<"Number of Target : ";
+            cin>>target;
+            int healAmount = rand() % 2 + 4;
+            cout<<"Using Mace Bash to heal to "<<heroes[target-1].getName()<<"(Hp : "<<heroes[target-1].getHp()<<")"<<" by "<<healAmount<<endl;
         }
         else if(numberOfSkill == 4){
+            int healAmount = rand() % 3 + 1;
             cout<<"Divine Comfort Selected!"<<endl;
+            cout<<"Healing all Heroes by "<<healAmount<<endl;
         }
         cout<<"----------------------------------------"<<endl;
         }
 
         else if(attackOrderArray[i].getName() == "Crusader #1"||attackOrderArray[i].getName() == "Crusader #2"){
-        cout<<"1 : Smite (Attack)"<<endl;
-        cout<<"2 : Stunning Blow (Attack)"<<endl;
-        cout<<"3 : Holy Lance (Attack)"<<endl;
-        cout<<"4 : Bulwark of Faith (Utility)"<<endl;
-        cout<<"Number of Skill : ";
-        cin>>numberOfSkill;
+        if(attackOrderArray[i].getPosition() == 1 || attackOrderArray[i].getPosition() == 2){
+            cout<<"1 : Smite (Attack)"<<endl;
+            cout<<"2 : Stunning Blow (Attack)"<<endl;
+            cout<<"3 : Bulwark of Faith (Utility)"<<endl;
+            cout<<"Number of Skill : ";
+            cin>>numberOfSkill;
+            if(numberOfSkill==4){
+                cout<<"Number of Skill selected 1 automatically because your selection is not an option! "<<endl;
+                numberOfSkill = 1;
+
+            }
+        }
+        else{
+            int target;
+            cout<<"4 : Holy Lance (Attack)"<<endl;
+            cout<<"Holy Lance selected automatically!"<<endl;
+            cout<<"Select a target to attack!"<<endl;
+            cout<<"2-"<<monsters[1].getName()<<"(Hp : "<<monsters[1].getHp()<<")"<<endl;
+            cout<<"3-"<<monsters[2].getName()<<"(Hp : "<<monsters[2].getHp()<<")"<<endl;
+            cout<<"4-"<<monsters[3].getName()<<"(Hp : "<<monsters[3].getHp()<<")"<<endl;
+            cout<<"Number of Target : ";
+            cin>>target;
+            if(target==1){
+                cout<<"Number of Target selected 2 automatically because your selection is not an option! "<<endl;
+                target = 2;
+
+            }
+            cout<<"Using Holy Lance to attack to "<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
+        }
 
         if(numberOfSkill == 1){
             int target;
             cout<<"Smite Selected!"<<endl;
             cout<<"Select a target to attack!"<<endl;
-            cout<<"1-"<<monsters[0].getName()<<endl;
-            cout<<"2-"<<monsters[1].getName()<<endl;
+            cout<<"1-"<<monsters[0].getName()<<"(Hp : "<<monsters[0].getHp()<<")"<<endl;
+            cout<<"2-"<<monsters[1].getName()<<"(Hp : "<<monsters[1].getHp()<<")"<<endl;
             cout<<"Number of Target : ";
             cin>>target;
-            cout<<"Using Smite on "<<monsters[target-1].getName()<<endl;
+            if(target==3||target==4){
+                cout<<"Number of Target selected 1 automatically because your selection is not an option! "<<endl;
+                target = 1;
+
+            }
+            cout<<"Using Smite on "<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
+
         }
         else if(numberOfSkill == 2){
+            int target;
             cout<<"Stunning Blow Selected!"<<endl;
+            cout<<"Select a target to attack!"<<endl;
+            cout<<"1-"<<monsters[0].getName()<<"(Hp : "<<monsters[0].getHp()<<")"<<endl;
+            cout<<"2-"<<monsters[1].getName()<<"(Hp : "<<monsters[1].getHp()<<")"<<endl;
+            cout<<"Number of Target : ";
+            cin>>target;
+            if(target==3||target==4){
+                cout<<"Number of Target selected 1 automatically because your selection is not an option! "<<endl;
+                target = 1;
+
+            }
+            cout<<"Using Stunning Blow on "<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
         }
         else if(numberOfSkill == 3){
-            cout<<"Holy Lance Selected!"<<endl;
-        }
-        else if(numberOfSkill == 4){
             cout<<"Bulwark of Faith Selected!"<<endl;
+            cout<<"Using Bulwark of Faith on "<<attackOrderArray[i].getName()<<", +20 protection for 3 round."<<endl;
+
         }
         cout<<"----------------------------------------"<<endl;
         }
