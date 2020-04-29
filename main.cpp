@@ -62,6 +62,9 @@ public:
     name = nam;
     }
 
+    void setProt(int prot) {
+        this->prot = prot;
+    }
     void setSpeed(int sped){
     speed = sped;
     }
@@ -403,22 +406,57 @@ public:
     }
 };
 class UtilitySkill: public Skill{
-    int position;
-    string Target;
+protected:
+    int minHp;
+    int maxHp;
+    int protSituation;
+    int prot;
+public:
+    int utilityFunc(Unit healer, Unit target){
+        int randomNumber = rand() % minHp + maxHp;
+        target.setHp(target.getHp() + randomNumber)   ;
+        if(protSituation = 1){
+            target.setProt(target.getProt() + prot);
+        }
+        else{
+
+        }
+        return target.getHp();
+    }
     // string effect gelecek +20 Prot for 3 round
 };
 
 class Bulwark_Of_Faith: public UtilitySkill{
-
+public:
+    Bulwark_Of_Faith(){
+        prot = 30;
+        protSituation = 1;
+    //+20 Prot for 3 round
+    }
 };
 class Divine_Grace: public UtilitySkill{
-
+public:
+    Divine_Grace(){
+        minHp = 4;
+        maxHp = 5;
+        protSituation = 0;
+    }
 };
 class Divine_Comfort: public UtilitySkill{
-
+public:
+    Divine_Comfort(){
+        minHp = 1;
+        maxHp = 3;
+        protSituation = 0;
+    }
 };
 class Knitting_Bones: public UtilitySkill{
-
+public:
+    Knitting_Bones(){
+        minHp = 2;
+        maxHp = 3;
+        protSituation = 0;
+    }
 };
 
 
