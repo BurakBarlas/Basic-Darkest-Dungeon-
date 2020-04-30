@@ -10,6 +10,7 @@ using namespace std;
 class Unit {
 protected:
     string name;
+    int deathBlowResist;
     int position;
     int maxHp;
     int hp;
@@ -21,17 +22,20 @@ protected:
     int minDmg;
     int maxDmg;
     int stunResist;
-    bool alive = true;
-    bool stun = false;
+    int alive;
+    int stun;
+    int protTurn;
 public:
     Unit(){}
 
-    void virtual dying() {}
     string getName() {
         return name;
     }
     int getHp(){
         return hp;
+    }
+    int getMaxHp(){
+        return maxHp;
     }
     int getDodge() {
         return dodge;
@@ -62,6 +66,14 @@ public:
         return position;
     }
 
+    int getProtTurn(){
+        return protTurn;
+    }
+
+    void setProtTurn(int protTrn){
+    protTurn = protTrn;
+    }
+
     void setName(string nam){
     name = nam;
     }
@@ -82,23 +94,45 @@ public:
     }
 
 
-    bool isAlive() {
+    int isAlive() {
         return alive;
     }
 
-    bool isStun() {
+    int isStun() {
         return stun;
     }
 
-   void setStun(int stun) {
-        this->stun = stun;
+    void setStun(int effect) {
+        stun = effect;
+    }
+
+    int getDeathBlowResist(){
+    return deathBlowResist;
+    }
+
+    void setAlive(int effect) {
+        alive = effect;
+    }
+
+    int dying(Unit defender){
+        if(defender.getHp()== 0){
+            int randomNumber = rand() % 101;
+            if(defender.getDeathBlowResist() > randomNumber){
+                cout<<"This Unit lives with DeathBlowResist !"<<endl;
+                return 1;
+            }
+            else{
+                cout<<"Defender Unit died !"<<endl;
+                return 0;
+            }
+        }
+        return 1;
     }
 
 
 };
 class Hero: public Unit{
 protected:
-    int deathBlowResist;
 public:
     Hero(){}
 
@@ -110,18 +144,7 @@ public:
     void attack() {
 
     }
-    void dying(){
-        if(hp == 0){
-            int randomNumber = rand() % 101;
-            if(deathBlowResist >= randomNumber){
-                //bir sey olmaz hero yasamaya devam eder.
-            }
-            else{
-                alive = false;
-                //hero olur karakter dummy olarak atanir.
-            }
-        }
-    }
+
 };
 class Crusader: public Hero {
 public:
@@ -139,6 +162,9 @@ public:
         maxDmg = 12;
         deathBlowResist=67;
         stunResist = 40;
+        stun = 0;
+        alive = 1;
+        protTurn = 0;
     }
     void useSkill(int choice){
         if(choice == 1){
@@ -178,6 +204,8 @@ public:
         maxDmg = 8;
         deathBlowResist = 77;
         stunResist = 30;
+        stun = 0;
+        alive = 1;
     }
     void useSkill(int choice){
         if(choice == 1){
@@ -203,11 +231,7 @@ public:
 class Monster: public Unit {
 protected:
     Monster(){}
-    void dying(){
-        alive = false;
-        // karakter dummy olarak atanir.
 
-    }
 };
 class Bone_Soldier: public Monster{
 public:
@@ -224,6 +248,9 @@ public:
         minDmg = 3;
         maxDmg = 8;
         stunResist = 25;
+        deathBlowResist = 0;
+        stun = 0;
+        alive = 1;
     }
     void useSkill(int choice){
         if(choice == 1){
@@ -253,6 +280,9 @@ public:
         minDmg = 2;
         maxDmg = 4;
         stunResist = 45;
+        deathBlowResist = 0;
+        stun = 0;
+        alive = 1;
     }
     void useSkill(int choice){
         if(choice == 1){
@@ -313,17 +343,6 @@ public:
                     cout<<attacker.getName()<<", CRIT damage : "<<critHit<<endl;
                     defender.setHp(defender.getHp()-critHit);
 
-                    int stunChange = 20 + stunBase - defender.getStunResist();
-                    randomNumber = rand() % 101;
-
-                    if(randomNumber <= stunChange) {
-                        defender.setStun(true);
-                        cout << defender.getName() << " Stuned for this round." << endl;
-                    }
-                    else{
-                        // stun yemez
-                    }
-
 
                 }
                 else {
@@ -333,26 +352,60 @@ public:
                     cout<<attacker.getName()<<", NORMAL damage : "<<actualDmg<<endl;
                     defender.setHp(defender.getHp()-actualDmg);
 
-                    int stunChange = stunBase - defender.getStunResist();
-                    randomNumber = rand() % 101;
-
-                    if(randomNumber <= stunChange) {
-                        defender.setStun(true);
-                    }
-                    else{
-                        // stun yemez
-                    }
 
                 } // normal vurur
             } else {
                 cout <<attacker.getName()<<" missed the Hit!"<<endl; // missing
             }
-            if(defender.getHp() <= 0){
-                        defender.setHp(0);
-                        defender.dying();
+            if(defender.getHp() < 0){
+                defender.setHp(0);
             }
             return defender.getHp();
     }
+
+    int stunFunc(Unit attacker, Unit defender) {
+            int randomNumber = rand() % 101;
+            int hitChange = baseAcc + attacker.getAccMod() - defender.getDodge();
+
+            if (hitChange >= randomNumber) { // saldirir ve crit hesaplamasi yapilir
+                double criticalChance = attacker.getBaseCrit() + critMod;
+                randomNumber = rand() % 101;
+
+                if (criticalChance >= randomNumber) { // crit vurur
+
+                    int stunChange = 20 + stunBase - defender.getStunResist();
+                    randomNumber = rand() % 101;
+
+                    if(randomNumber <= stunChange) {
+                        return 1;
+                        cout << defender.getName() << " Stunned for this round." << endl;
+                    }
+                    else{
+                        return 0;
+                    }
+
+
+                }
+                else {
+
+                    int stunChange = stunBase - defender.getStunResist();
+                    randomNumber = rand() % 101;
+
+                    if(randomNumber <= stunChange) {
+                        return 1;
+                        cout<< defender.getName() << " Stunned for this round." << endl;
+                    }
+                    else{
+                        return 0;
+                    }
+
+                } // normal vurur
+            } else {
+                return 0;
+            }
+
+    }
+
     int getDmgMod(){
         return dmgMod;
     }
@@ -461,7 +514,7 @@ public:
     int utilityFunc(Unit healer, Unit target){
         int randomNumber = rand() % minHp + maxHp;
         target.setHp(target.getHp() + randomNumber);
-        if(protSituation = 1){
+        if(protSituation == 1){
             healer.setProt(healer.getProt() + prot);
             cout << healer.getName() << " +20 Prot earned." << endl;
             protRound = 1;
@@ -614,19 +667,13 @@ int main() {
     int numberOfSkill;
     bool gameover = false;
 
-
 do {
     cout<<"---R O U N D  "<<numberOfRound<<"---"<<endl;
     cout<<endl;
-
     for(int i = 7;i>=0;i--){
-    if(attackOrderArray[i].isAlive() == true){
+    if(attackOrderArray[i].isAlive() == 1 && attackOrderArray[i].isStun() == 0){
         cout<<attackOrderArray[i].getName()<<"'s turn! "<<"Select a skill!"<<endl;
-        /*for(int j = 0;j<8;j++){
-            cout<<attackOrderArray[j].getName()<<" ";
-            cout<<attackOrderArray[j].getSpeed()+randSpeeds[j]<<endl;
 
-        }*//*Test için duruyor*/
         if(attackOrderArray[i].getName() == "Vestal #1"||attackOrderArray[i].getName() == "Vestal #2"){
         if(attackOrderArray[i].getPosition() == 1){
             int target;
@@ -641,6 +688,15 @@ do {
             cout<<"Using Mace Bash to attack to "<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
             monsters[target-1].setHp(Skill_Mace_Bash.attackFunc(attackOrderArray[i],monsters[target-1]));
             cout<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
+            if(monsters[target-1].getHp() == 0){
+                monsters[target-1].setAlive(0);
+                for(int i = 7 ; i>=0;i--){
+                    if(attackOrderArray[i].getName()==monsters[target-1].getName()){
+                        attackOrderArray[i].setAlive(0);
+                    }
+                }
+                cout<<monsters[target-1].getName()<<" died !"<<endl;
+            }
 
         }
         else if(attackOrderArray[i].getPosition() == 2){
@@ -686,6 +742,10 @@ do {
             cout<<"Using Mace Bash to attack to "<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
             monsters[target-1].setHp(Skill_Mace_Bash.attackFunc(attackOrderArray[i],monsters[target-1]));
             cout<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
+            if(monsters[target-1].getHp() == 0){
+                monsters[target-1].setAlive(0);
+                cout<<monsters[target-1].getName()<<" died !"<<endl;
+            }
         }
         else if(numberOfSkill == 2){
             int target;
@@ -703,7 +763,17 @@ do {
             }
             cout<<"Using Dazzling Light to attack to "<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
             monsters[target-1].setHp(Skill_Dazzling_Light.attackFunc(attackOrderArray[i],monsters[target-1]));
+            monsters[target-1].setStun(Skill_Dazzling_Light.stunFunc(attackOrderArray[i],monsters[target-1]));
             cout<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
+            if(monsters[target-1].getHp() == 0){
+                monsters[target-1].setAlive(0);
+                for(int i = 7 ; i>=0;i--){
+                    if(attackOrderArray[i].getName()==monsters[target-1].getName()){
+                        attackOrderArray[i].setAlive(0);
+                    }
+                }
+                cout<<monsters[target-1].getName()<<" died !"<<endl;
+            }
         }
         else if(numberOfSkill == 3){
             int target;
@@ -716,12 +786,28 @@ do {
             cout<<"Number of Target : ";
             cin>>target;
             int healAmount = rand() % 2 + 4;
-            cout<<"Using Divine Grace to heal to "<<heroes[target-1].getName()<<"(Hp : "<<heroes[target-1].getHp()<<")"<<" by "<<healAmount<<endl;//After Heal function
+            cout<<"Using Divine Grace to heal to "<<heroes[target-1].getName()<<"(Hp : "<<heroes[target-1].getHp()<<")"<<" by "<<healAmount<<endl;
+            heroes[target-1].setHp(heroes[target-1].getHp()+healAmount);
+            if(heroes[target-1].getHp()>heroes[target-1].getMaxHp()){
+                heroes[target-1].setHp(heroes[target-1].getMaxHp());
+            }
+            cout<<heroes[target-1].getName()<<"(Hp : "<<heroes[target-1].getHp()<<")"<<endl;
         }
         else if(numberOfSkill == 4){
             int healAmount = rand() % 3 + 1;
             cout<<"Divine Comfort Selected!"<<endl;
             cout<<"Healing all Heroes by "<<healAmount<<endl;
+            for(int j = 0 ; j<4 ; j++){
+                heroes[j].setHp(heroes[j].getHp()+healAmount);
+                if(heroes[j].getHp() > heroes[j].getMaxHp()){
+                    heroes[j].setHp(heroes[j].getMaxHp());
+                }
+            }
+            for(int j = 3;j>=0;j--){
+               cout<<heroes[j].getName()<<"(Hp : "<<heroes[j].getHp()<<")  ";
+            }
+            cout<<endl;
+
         }
         cout<<"----------------------------------------"<<endl;
         }
@@ -757,6 +843,15 @@ do {
             cout<<"Using Holy Lance to attack to "<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
             monsters[target-1].setHp(Skill_Holy_Lance.attackFunc(attackOrderArray[i],monsters[target-1]));
             cout<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
+            if(monsters[target-1].getHp() == 0){
+                monsters[target-1].setAlive(0);
+                for(int i = 7 ; i>=0;i--){
+                    if(attackOrderArray[i].getName()== monsters[target-1].getName()){
+                        attackOrderArray[i].setAlive(0);
+                    }
+                }
+                cout<<monsters[target-1].getName()<<" died !"<<endl;
+            }
         }
 
         if(numberOfSkill == 1){
@@ -775,6 +870,15 @@ do {
             cout<<"Using Smite on "<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
             monsters[target-1].setHp(Skill_Smite.attackFunc(attackOrderArray[i],monsters[target-1]));
             cout<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
+            if(monsters[target-1].getHp() == 0){
+                monsters[target-1].setAlive(0);
+                for(int i = 7 ; i>=0;i--){
+                    if(attackOrderArray[i].getName()==monsters[target-1].getName()){
+                        attackOrderArray[i].setAlive(0);
+                    }
+                }
+                cout<<monsters[target-1].getName()<<" died !"<<endl;
+            }
         }
         else if(numberOfSkill == 2){
             int target;
@@ -791,11 +895,26 @@ do {
             }
             cout<<"Using Stunning Blow on "<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
             monsters[target-1].setHp(Skill_Stunning_Blow.attackFunc(attackOrderArray[i],monsters[target-1]));
+            monsters[target-1].setStun(Skill_Stunning_Blow.stunFunc(attackOrderArray[i],monsters[target-1]));
             cout<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
+            if(monsters[target-1].getHp() == 0){
+                monsters[target-1].setAlive(0);
+                for(int i = 7 ; i>=0;i--){
+                    if(attackOrderArray[i].getName()==monsters[target-1].getName()){
+                        attackOrderArray[i].setAlive(0);
+                    }
+                }
+                cout<<monsters[target-1].getName()<<" died !"<<endl;
+
+            }
         }
         else if(numberOfSkill == 3){
             cout<<"Bulwark of Faith Selected!"<<endl;
-            cout<<"Using Bulwark of Faith on "<<attackOrderArray[i].getName()<<", +20 protection for 3 round."<<endl;
+            cout<<"Using Bulwark of Faith on "<<attackOrderArray[i].getName()<<", +20 protection for 3 round (1 fight)."<<endl;
+            attackOrderArray[i].setProt(0);
+            attackOrderArray[i].setProt(attackOrderArray[i].getProt()+20);
+            attackOrderArray[i].setProtTurn(3);
+            cout<<attackOrderArray[i].getName()<<"(Protection : "<<attackOrderArray[i].getProt()<<")"<<endl;
 
         }
         cout<<"----------------------------------------"<<endl;
@@ -812,15 +931,29 @@ do {
 
                 heroes[4-target].setHp(Skill_Axeblade.attackFunc(attackOrderArray[i],heroes[4-target]));
                 cout<<heroes[4-target].getName()<<"(Hp : "<<heroes[4-target].getHp()<<")"<<endl;
+                if(heroes[4-target].getHp() == 0){
+                heroes[4-target].setAlive(heroes[4-target].dying(heroes[4-target]));
+                }
+                if(heroes[4-target].getProtTurn() != 0 ){
+                    heroes[4-target].setProtTurn(0);
+                }
             }
             else if(numOfSkill==2){
                 cout<<attackOrderArray[i].getName()<<" is selected Dead Weight to attack to "<<heroes[4-target].getName()<<endl;
 
                 heroes[4-target].setHp(Skill_Dead_Weight.attackFunc(attackOrderArray[i],heroes[4-target]));
+                heroes[4-target].setStun(Skill_Dead_Weight.stunFunc(attackOrderArray[i],heroes[4-target]));
                 cout<<heroes[4-target].getName()<<"(Hp : "<<heroes[4-target].getHp()<<")"<<endl;
+                if(heroes[4-target].getHp() == 0){
+                heroes[4-target].setAlive(heroes[4-target].dying(heroes[4-target]));
+                }
+                if(heroes[4-target].getProtTurn() != 0 ){
+                    heroes[4-target].setProtTurn(0);
+                }
             }
             else if(numOfSkill==3){
                 cout<<attackOrderArray[i].getName()<<" is selected Knitting Bones to heal to "<<monsters[healMonster].getName()<<" by " <<randHealAmount<<endl;
+                cout<<monsters[healMonster].getName()<<"(Hp : "<<monsters[healMonster].getHp()<<")"<<endl;
             }
             cout<<"----------------------------------------"<<endl;
 
@@ -837,6 +970,12 @@ do {
 
                 heroes[4-target].setHp(Skill_Graveyard_Slash.attackFunc(attackOrderArray[i],heroes[4-target]));
                 cout<<heroes[4-target].getName()<<"(Hp : "<<heroes[4-target].getHp()<<")"<<endl;
+                if(heroes[4-target].getHp() == 0){
+                heroes[4-target].setAlive(heroes[4-target].dying(heroes[4-target]));
+                }
+                if(heroes[4-target].getProtTurn() != 0 ){
+                    heroes[4-target].setProtTurn(0);
+                }
 
             }
             else if(numOfSkill==2){
@@ -844,32 +983,34 @@ do {
 
                 heroes[4-target].setHp(Skill_Graveyard_Stumble.attackFunc(attackOrderArray[i],heroes[4-target]));
                 cout<<heroes[4-target].getName()<<"(Hp : "<<heroes[4-target].getHp()<<")"<<endl;
+                if(heroes[4-target].getHp() == 0){
+                heroes[4-target].setAlive(heroes[4-target].dying(heroes[4-target]));
+                }
+                if(heroes[4-target].getProtTurn() != 0 ){
+                    heroes[4-target].setProtTurn(0);
+                }
 
-                cout<<"And "<<attackOrderArray[i].getName()<<" moves 1 step forward!"<<endl;
+                cout<<attackOrderArray[i].getName()<<" moves 1 step forward!"<<endl;
             }
             cout<<"----------------------------------------"<<endl;
         }
-
-
-
     }
+    else if (attackOrderArray[i].isStun() == 1){
+        cout<<attackOrderArray[i].getName()<<" can not Attack because has Stun."<<endl;
+        cout<<"------------------------------------------"<<endl;
     }
+    if(attackOrderArray[i].getProtTurn() != 0 ){
+    attackOrderArray[i].setProtTurn(attackOrderArray[i].getProtTurn()-1);
+    }
+}
 
-
-
-
-
-
-
-
-
-
-if(heroes[0].getHp()+heroes[1].getHp()+heroes[2].getHp()+heroes[3].getHp() == 0 ||
-   monsters[0].getHp()+monsters[1].getHp()+monsters[2].getHp()+monsters[3].getHp() == 0){
-    gameover = true;
-   }
-
+for(int i = 0;i<=7;i++){
+    attackOrderArray[i].setStun(0);
+}
+if(heroes[0].getHp()+heroes[1].getHp()+heroes[2].getHp()+heroes[3].getHp() == 0 ){cout<<"End of Game , LOSE !"<<endl;gameover = true;}
+if(monsters[0].getHp()+monsters[1].getHp()+monsters[2].getHp()+monsters[3].getHp() == 0){cout<<"End of Game , WİN !"<<endl;gameover = true;}
 numberOfRound++;
+
 
 } while (gameover == false);
 
