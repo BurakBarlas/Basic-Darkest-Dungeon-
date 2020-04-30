@@ -22,6 +22,7 @@ protected:
     int maxDmg;
     int stunResist;
     bool alive = true;
+    bool stun = false;
 public:
     Unit(){}
 
@@ -53,6 +54,9 @@ public:
     int getMaxDmg() {
         return maxDmg;
     }
+    int getStunResist() {
+        return stunResist;
+    }
 
     int getPosition() {
         return position;
@@ -81,6 +85,19 @@ public:
     bool isAlive() {
         return alive;
     }
+
+    bool isStun() {
+        return stun;
+    }
+
+    int getStun() {
+        return stun;
+   }
+
+   void setStun(int stun) {
+        this->stun = stun;
+    }
+
 
 };
 class Hero: public Unit{
@@ -281,7 +298,7 @@ protected:
     int dmgMod;
     int baseAcc;
     double critMod;
-    string stunEffect;
+    int stunEffect;
     int stunBase;
 public:
 
@@ -300,6 +317,16 @@ public:
                     cout<<attacker.getName()<<", CRIT damage : "<<critHit<<endl;
                     defender.setHp(defender.getHp()-critHit);
 
+                    int stunChange = 20 + stunBase - defender.getStunResist();
+                    randomNumber = rand() % 101;
+
+                    if(randomNumber <= stunChange) {
+                        defender.setStun(true);
+                    }
+                    else{
+                        // stun yemez
+                    }
+
 
                 }
                 else {
@@ -308,6 +335,17 @@ public:
                     double actualDmg = rawDmg - rawDmg * (defender.getProt() / 100.0);
                     cout<<attacker.getName()<<", NORMAL damage : "<<actualDmg<<endl;
                     defender.setHp(defender.getHp()-actualDmg);
+
+                    int stunChange = stunBase - defender.getStunResist();
+                    randomNumber = rand() % 101;
+
+                    if(randomNumber <= stunChange) {
+                        defender.setStun(true);
+                    }
+                    else{
+                        // stun yemez
+                    }
+
                 } // normal vurur
             } else {
                 cout <<attacker.getName()<<" missed the Hit!"<<endl; // missing
@@ -335,6 +373,7 @@ public:
         dmgMod = 0;
         baseAcc = 85;
         critMod = 0;
+        stunEffect = 0;
     }
 
 };
@@ -345,6 +384,7 @@ public:
         baseAcc = 90;
         critMod = 0;
         stunBase = 100;
+        stunEffect = 1;
     }
 };
 class Holy_Lance: public AttackSkill, public MoveSkill{
@@ -353,6 +393,8 @@ public:
         dmgMod = 0;
         baseAcc = 85;
         critMod = 6.5;
+        stunEffect = 0;
+
     }
 };
 class Mace_Bash: public AttackSkill{
@@ -361,6 +403,7 @@ public:
         dmgMod = 0;
         baseAcc = 85;
         critMod = 0;
+        stunEffect = 0;
     }
 };
 class Dazzling_Light: public AttackSkill, public StunSkill{
@@ -370,6 +413,7 @@ public:
         baseAcc = 90;
         critMod = 5;
         stunBase = 100;
+        stunEffect = 1;
     }
 };
 class Graveyard_Slash: public AttackSkill{
@@ -378,6 +422,7 @@ public:
         dmgMod = 0;
         baseAcc = 85;
         critMod = 6;
+        stunEffect = 0;
     }
 };
 class Graveyard_Stumble: public AttackSkill, public MoveSkill{
@@ -386,6 +431,7 @@ public:
         dmgMod = -50;
         baseAcc = 45;
         critMod = 0;
+        stunEffect = 0;
     }
 };
 class Axeblade: public AttackSkill{
@@ -394,6 +440,7 @@ public:
         dmgMod = 0;
         baseAcc = 72;
         critMod = 6;
+        stunEffect = 0;
     }
 };
 class Dead_Weight: public AttackSkill, public StunSkill{
@@ -403,6 +450,7 @@ public:
         baseAcc = 82;
         critMod = 6;
         stunBase = 100;
+        stunEffect = 1;
     }
 };
 class UtilitySkill: public Skill{
@@ -414,7 +462,7 @@ protected:
 public:
     int utilityFunc(Unit healer, Unit target){
         int randomNumber = rand() % minHp + maxHp;
-        target.setHp(target.getHp() + randomNumber)   ;
+        target.setHp(target.getHp() + randomNumber);
         if(protSituation = 1){
             target.setProt(target.getProt() + prot);
         }
