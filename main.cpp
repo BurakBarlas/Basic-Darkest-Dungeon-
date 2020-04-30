@@ -316,7 +316,26 @@ public:
 
 };
 class MoveSkill: public Skill{
+public:
+MoveSkill(){}
+//For Holy Lance
+int MoveFuncForward1(int position){
 
+    position--;
+    if(position == 0){
+        position =4;
+    }
+    return position;
+}
+// For Graveyard Stumble
+int MoveFuncBackward1(int position){
+
+    position++;
+    if (position == 5){
+        position = 1;
+    }
+    return position;
+}
 };
 
 class AttackSkill: public Skill{
@@ -622,8 +641,8 @@ int main() {
     Dead_Weight Skill_Dead_Weight;//Attack
     Knitting_Bones Skill_Knitting_Bones;//Utility (Heal)
 
-
-
+    MoveSkill Forward1;
+    MoveSkill Backward1;
 
 
     Unit attackOrderArray[8];attackOrderArray[0] = secondVestal;attackOrderArray[1] = firstVestal;
@@ -843,6 +862,9 @@ do {
             cout<<"Using Holy Lance to attack to "<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
             monsters[target-1].setHp(Skill_Holy_Lance.attackFunc(attackOrderArray[i],monsters[target-1]));
             cout<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
+
+            heroes[i].setPosition(Forward1.MoveFuncForward1(heroes[i].getPosition())); // BUNUN YERI YANLIS OLABILIR
+
             if(monsters[target-1].getHp() == 0){
                 monsters[target-1].setAlive(0);
                 for(int i = 7 ; i>=0;i--){
@@ -983,6 +1005,9 @@ do {
 
                 heroes[4-target].setHp(Skill_Graveyard_Stumble.attackFunc(attackOrderArray[i],heroes[4-target]));
                 cout<<heroes[4-target].getName()<<"(Hp : "<<heroes[4-target].getHp()<<")"<<endl;
+
+                heroes[i].setPosition(Forward1.MoveFuncForward1(heroes[i].getPosition())); // YERI YANLIS OLABILR E.
+                
                 if(heroes[4-target].getHp() == 0){
                 heroes[4-target].setAlive(heroes[4-target].dying(heroes[4-target]));
                 }
