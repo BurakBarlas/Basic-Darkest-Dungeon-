@@ -90,10 +90,6 @@ public:
         return stun;
     }
 
-    int getStun() {
-        return stun;
-   }
-
    void setStun(int stun) {
         this->stun = stun;
     }
@@ -322,6 +318,7 @@ public:
 
                     if(randomNumber <= stunChange) {
                         defender.setStun(true);
+                        cout << defender.getName() << " Stuned for this round." << endl;
                     }
                     else{
                         // stun yemez
@@ -459,17 +456,23 @@ protected:
     int maxHp;
     int protSituation;
     int prot;
+    int protRound;
 public:
     int utilityFunc(Unit healer, Unit target){
         int randomNumber = rand() % minHp + maxHp;
         target.setHp(target.getHp() + randomNumber);
         if(protSituation = 1){
-            target.setProt(target.getProt() + prot);
+            healer.setProt(healer.getProt() + prot);
+            cout << healer.getName() << " +20 Prot earned." << endl;
+            protRound = 1;
         }
         else{
 
         }
         return target.getHp();
+    }
+    void add() {
+        protRound += 1;
     }
     // string effect gelecek +20 Prot for 3 round
 };
@@ -477,7 +480,7 @@ public:
 class Bulwark_Of_Faith: public UtilitySkill{
 public:
     Bulwark_Of_Faith(){
-        prot = 30;
+        prot = 20;
         protSituation = 1;
     //+20 Prot for 3 round
     }
