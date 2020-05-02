@@ -68,6 +68,13 @@ public:
         speed = speed + speedIncrement;
     }
 
+    void increaseHp(int hpIncrement) {
+        hp = hp + hpIncrement;
+        if(hp > maxHp){
+            hp = maxHp;
+        }
+    }
+
     void setName(string nam){
         name = nam;
     }
@@ -341,7 +348,7 @@ public:
 
             }
             else {
-                int dmg = rand() % attacker->getMaxDmg() + attacker->getMinDmg();
+                int dmg = rand() % (attacker->getMaxDmg() - attacker->getMinDmg()) + attacker->getMinDmg();
                 double rawDmg = dmg * (100 + dmgMod) / 100.0;
                 double actualDmg = rawDmg - rawDmg * (defender->getProt() / 100.0);
                 cout << attacker->getName() << ", NORMAL damage : " << actualDmg<<endl;
@@ -463,24 +470,23 @@ public:
 };
 class UtilitySkill: public Skill{
 protected:
-    int minHp;
-    int maxHp;
-    int protSituation;
-    int prot;
-    int protRound;
+    int minHp = 0;
+    int maxHp = 0;
+    int prot = 0;
+    int protRound = 0;
 public:
-    int utilityFunc(Unit healer, Unit target){
-        int randomNumber = rand() % minHp + maxHp;
-        target.setHp(target.getHp() + randomNumber);
-        if(protSituation = 1){
-            healer.setProt(healer.getProt() + prot);
-            cout << healer.getName() << " +20 Prot earned." << endl;
+    void utilityFunc(shared_ptr<Unit> healer,shared_ptr<Unit> target){
+        if(maxHp) {
+            double randomNumber = rand() % (maxHp-minHp) + minHp;
+            target->increaseHp(randomNumber);
+        }
+        if(prot) {
+            target->setProt(healer->getProt() + prot);
+            cout << target->getName() << " +20 Prot earned." << endl;
             protRound = 1;
         }
         else{
-
         }
-        return target.getHp();
     }
     void add() {
         protRound += 1;
@@ -492,7 +498,6 @@ class Bulwark_Of_Faith: public UtilitySkill{
 public:
     Bulwark_Of_Faith(){
         prot = 20;
-        protSituation = 1;
         //+20 Prot for 3 round
     }
 };
@@ -501,7 +506,6 @@ public:
     Divine_Grace(){
         minHp = 4;
         maxHp = 5;
-        protSituation = 0;
     }
 };
 class Divine_Comfort: public UtilitySkill{
@@ -509,7 +513,6 @@ public:
     Divine_Comfort(){
         minHp = 1;
         maxHp = 3;
-        protSituation = 0;
     }
 };
 class Knitting_Bones: public UtilitySkill{
@@ -517,7 +520,6 @@ public:
     Knitting_Bones(){
         minHp = 2;
         maxHp = 3;
-        protSituation = 0;
     }
 };
 
@@ -621,6 +623,7 @@ int main() {
 
     do {
         cout<<"---R O U N D  "<<numberOfRound<<"---"<<endl;
+        //
         cout<<endl;
 
         for(int i = 7;i>=0;i--){
@@ -782,7 +785,7 @@ int main() {
 
                         }
                         cout<<"Using Smite on "<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
-                        //monsters[target-1].setHp(Skill_Smite.attackFunc(&attackOrderArray[i], &monsters[target-1]));
+
                         Skill_Smite.attackFunc(attackOrderArray[i], monsters[target-1]);
                         cout<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
                     }
@@ -809,7 +812,10 @@ int main() {
                         cout<<"Using Bulwark of Faith on "<<attackOrderArray[i]->getName()<<", +20 protection for 3 round."<<endl;
 
                     }
-                    cout<<"----------------------------------------"<<endl;
+                    cout << attackOrderArray[i]->getName()<< " selected Bulwark of Faith to heal to self."<< endl;
+                    Skill_Bulwark_Of_Faith.utilityFunc(attackOrderArray[i], attackOrderArray[i]);
+                    cout << attackOrderArray[i]->getName() << "(Hp : " << attackOrderArray[i]->getHp() <<")"<< endl;
+                    //cout << "deneme " << attackOrderArray[i]->getProt() << endl;
                 }
 
                 else if(attackOrderArray[i]->getName()=="Bone Defender #1"||attackOrderArray[i]->getName() == "Bone Defender #2"){
