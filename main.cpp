@@ -4,13 +4,13 @@
 #include <ctime>
 #include <time.h>
 #include <stdio.h>
+#include <memory>
 
 using namespace std;
 
 class Unit {
 protected:
     string name;
-    int deathBlowResist;
     int position;
     int maxHp;
     int hp;
@@ -22,20 +22,18 @@ protected:
     int minDmg;
     int maxDmg;
     int stunResist;
-    int alive;
-    int stun;
-    int protTurn;
+    bool alive = true;
+    bool stun = false;
 public:
     Unit(){}
+
+    void virtual dying() {}
 
     string getName() {
         return name;
     }
     int getHp(){
         return hp;
-    }
-    int getMaxHp(){
-        return maxHp;
     }
     int getDodge() {
         return dodge;
@@ -66,73 +64,55 @@ public:
         return position;
     }
 
-    int getProtTurn(){
-        return protTurn;
-    }
-
-    void setProtTurn(int protTrn){
-    protTurn = protTrn;
+    void increaseSpeed(int speedIncrement) {
+        speed = speed + speedIncrement;
     }
 
     void setName(string nam){
-    name = nam;
+        name = nam;
     }
 
     void setProt(int prot) {
         this->prot = prot;
     }
     void setSpeed(int sped){
-    speed = sped;
+        speed = sped;
     }
 
     void setPosition(int pst){
-    position = pst;
+        position = pst;
     }
 
     void setHp(int hpp){
-    hp = hpp;
+        hp = hpp;
     }
 
 
-    int isAlive() {
+    bool isAlive() {
         return alive;
     }
 
-    int isStun() {
+    bool isStun() {
         return stun;
     }
 
-    void setStun(int effect) {
-        stun = effect;
+    void setStun(int stun) {
+        this->stun = stun;
+        cout << name << " stunned for this round." << endl;
     }
 
-    int getDeathBlowResist(){
-    return deathBlowResist;
-    }
-
-    void setAlive(int effect) {
-        alive = effect;
-    }
-
-    int dying(Unit defender){
-        if(defender.getHp()== 0){
-            int randomNumber = rand() % 101;
-            if(defender.getDeathBlowResist() > randomNumber){
-                cout<<"This Unit lives with DeathBlowResist !"<<endl;
-                return 1;
-            }
-            else{
-                cout<<"Defender Unit died !"<<endl;
-                return 0;
-            }
+    void getDamage(int damage) {
+        hp = hp - damage;
+        if(hp <= 0 ) {
+            hp = 0;
+            dying();
         }
-        return 1;
     }
-
 
 };
 class Hero: public Unit{
 protected:
+    int deathBlowResist;
 public:
     Hero(){}
 
@@ -144,7 +124,19 @@ public:
     void attack() {
 
     }
-
+    void dying(){
+        if(hp == 0){
+            int randomNumber = rand() % 101;
+            if(deathBlowResist >= randomNumber){
+                cout << "Hero " << name << " didn't die this time." << endl;
+            }
+            else{
+                alive = false;
+                cout << "Hero " << name << " died." << endl;
+                //hero olur karakter dummy olarak atanir.
+            }
+        }
+    }
 };
 class Crusader: public Hero {
 public:
@@ -159,12 +151,10 @@ public:
         accMod = 0;
         baseCrit = 3;
         minDmg = 6;
-        maxDmg = 12;
+        //maxDmg = 12;
+        maxDmg = 1000; //deneme
         deathBlowResist=67;
         stunResist = 40;
-        stun = 0;
-        alive = 1;
-        protTurn = 0;
     }
     void useSkill(int choice){
         if(choice == 1){
@@ -201,11 +191,10 @@ public:
         accMod = 0;
         baseCrit = 1;
         minDmg = 4;
-        maxDmg = 8;
+        //maxDmg = 8;
+        maxDmg = 1000; // deneme
         deathBlowResist = 77;
         stunResist = 30;
-        stun = 0;
-        alive = 1;
     }
     void useSkill(int choice){
         if(choice == 1){
@@ -231,7 +220,10 @@ public:
 class Monster: public Unit {
 protected:
     Monster(){}
-
+    void dying(){
+        alive = false;
+        cout << "Monster " << name << " died." << endl;
+    }
 };
 class Bone_Soldier: public Monster{
 public:
@@ -248,9 +240,6 @@ public:
         minDmg = 3;
         maxDmg = 8;
         stunResist = 25;
-        deathBlowResist = 0;
-        stun = 0;
-        alive = 1;
     }
     void useSkill(int choice){
         if(choice == 1){
@@ -280,9 +269,6 @@ public:
         minDmg = 2;
         maxDmg = 4;
         stunResist = 45;
-        deathBlowResist = 0;
-        stun = 0;
-        alive = 1;
     }
     void useSkill(int choice){
         if(choice == 1){
@@ -316,26 +302,7 @@ public:
 
 };
 class MoveSkill: public Skill{
-public:
-MoveSkill(){}
-//For Holy Lance
-int MoveFuncForward1(int position){
 
-    position--;
-    if(position == 0){
-        position =4;
-    }
-    return position;
-}
-// For Graveyard Stumble
-int MoveFuncBackward1(int position){
-
-    position++;
-    if (position == 5){
-        position = 1;
-    }
-    return position;
-}
 };
 
 class AttackSkill: public Skill{
@@ -349,82 +316,55 @@ public:
 
     AttackSkill(){}
 
-    int attackFunc(Unit attacker, Unit defender) {
-            int randomNumber = rand() % 101;
-            int hitChange = baseAcc + attacker.getAccMod() - defender.getDodge();
+    void attackFunc(shared_ptr<Unit> attacker,shared_ptr<Unit> defender) {
+        int randomNumber = rand() % 101;
+        int hitChange = baseAcc + attacker->getAccMod() - defender->getDodge();
 
-            if (hitChange >= randomNumber) { // saldirir ve crit hesaplamasi yapilir
-                double criticalChance = attacker.getBaseCrit() + critMod;
+        if (hitChange >= randomNumber) { // saldirir ve crit hesaplamasi yapilir
+            double criticalChance = attacker->getBaseCrit() + critMod;
+            randomNumber = rand() % 101;
+
+            if (criticalChance >= randomNumber) { // crit vurur
+                double critHit = attacker->getMaxDmg() * 1.5;
+                cout<<attacker->getName()<<", CRIT damage : "<<critHit<<endl;
+                defender->getDamage(critHit);
+
+                int stunChange = 20 + stunBase - defender->getStunResist();
                 randomNumber = rand() % 101;
 
-                if (criticalChance >= randomNumber) { // crit vurur
-                    double critHit = attacker.getMaxDmg() * 1.5;
-                    cout<<attacker.getName()<<", CRIT damage : "<<critHit<<endl;
-                    defender.setHp(defender.getHp()-critHit);
-
-
+                if(0 <= stunChange) { //1=randomNumber
+                    defender->setStun(true);
                 }
-                else {
-                    int dmg = rand() % attacker.getMaxDmg() + attacker.getMinDmg();
-                    double rawDmg = dmg * (100 + dmgMod) / 100.0;
-                    double actualDmg = rawDmg - rawDmg * (defender.getProt() / 100.0);
-                    cout<<attacker.getName()<<", NORMAL damage : "<<actualDmg<<endl;
-                    defender.setHp(defender.getHp()-actualDmg);
+                else{
+                    // stun yemez
+                }
 
 
-                } // normal vurur
-            } else {
-                cout <<attacker.getName()<<" missed the Hit!"<<endl; // missing
             }
-            if(defender.getHp() < 0){
-                defender.setHp(0);
-            }
-            return defender.getHp();
-    }
+            else {
+                int dmg = rand() % attacker->getMaxDmg() + attacker->getMinDmg();
+                double rawDmg = dmg * (100 + dmgMod) / 100.0;
+                double actualDmg = rawDmg - rawDmg * (defender->getProt() / 100.0);
+                cout << attacker->getName() << ", NORMAL damage : " << actualDmg<<endl;
+                defender->getDamage(actualDmg);
 
-    int stunFunc(Unit attacker, Unit defender) {
-            int randomNumber = rand() % 101;
-            int hitChange = baseAcc + attacker.getAccMod() - defender.getDodge();
-
-            if (hitChange >= randomNumber) { // saldirir ve crit hesaplamasi yapilir
-                double criticalChance = attacker.getBaseCrit() + critMod;
+                int stunChange = stunBase - defender->getStunResist();
                 randomNumber = rand() % 101;
 
-                if (criticalChance >= randomNumber) { // crit vurur
-
-                    int stunChange = 20 + stunBase - defender.getStunResist();
-                    randomNumber = rand() % 101;
-
-                    if(randomNumber <= stunChange) {
-                        return 1;
-                        cout << defender.getName() << " Stunned for this round." << endl;
-                    }
-                    else{
-                        return 0;
-                    }
-
-
+                if(randomNumber <= stunChange) {
+                    defender->setStun(true);
                 }
-                else {
+                else{
+                    // stun yemez
+                }
 
-                    int stunChange = stunBase - defender.getStunResist();
-                    randomNumber = rand() % 101;
+            } // normal vurur
+        } else {
+            cout <<attacker->getName()<<" missed the Hit!"<<endl; // missing
+        }
 
-                    if(randomNumber <= stunChange) {
-                        return 1;
-                        cout<< defender.getName() << " Stunned for this round." << endl;
-                    }
-                    else{
-                        return 0;
-                    }
-
-                } // normal vurur
-            } else {
-                return 0;
-            }
-
+        // return defender->getHp();
     }
-
     int getDmgMod(){
         return dmgMod;
     }
@@ -533,7 +473,7 @@ public:
     int utilityFunc(Unit healer, Unit target){
         int randomNumber = rand() % minHp + maxHp;
         target.setHp(target.getHp() + randomNumber);
-        if(protSituation == 1){
+        if(protSituation = 1){
             healer.setProt(healer.getProt() + prot);
             cout << healer.getName() << " +20 Prot earned." << endl;
             protRound = 1;
@@ -554,7 +494,7 @@ public:
     Bulwark_Of_Faith(){
         prot = 20;
         protSituation = 1;
-    //+20 Prot for 3 round
+        //+20 Prot for 3 round
     }
 };
 class Divine_Grace: public UtilitySkill{
@@ -588,40 +528,15 @@ public:
 
 int main() {
     srand (time(0));
-    int randSpeed;
-    randSpeed = rand() % 8 + 1  ;
 
-    int randSpeed2;
-    randSpeed2 = rand() % 8 + 1  ;
-
-    int randSpeed3;
-    randSpeed3 = rand() % 8 + 1  ;
-
-    int randSpeed4;
-    randSpeed4 = rand() % 8 + 1  ;
-
-    int randSpeed5;
-    randSpeed5 = rand() % 8 + 1  ;
-
-    int randSpeed6;
-    randSpeed6 = rand() % 8 + 1  ;
-
-    int randSpeed7;
-    randSpeed7 = rand() % 8 + 1  ;
-
-    int randSpeed8;
-    randSpeed8 = rand() % 8 + 1  ;
-
-    int randSpeeds[8] = {randSpeed,randSpeed2,randSpeed3,randSpeed4,randSpeed5,randSpeed6,randSpeed7,randSpeed8};
-
-    Vestal firstVestal("Vestal #1",3);
-    Vestal secondVestal("Vestal #2",4);
-    Crusader firstCrusader("Crusader #1",1);
-    Crusader secondCrusader("Crusader #2",2);
-    Bone_Defender firstBoneD("Bone Defender #1",2);
-    Bone_Defender secondBoneD("Bone Defender #2",4);
-    Bone_Soldier firstBoneS("Bone Soldier #1",1);
-    Bone_Soldier secondBoneS("Bone Soldier #2",3);
+    shared_ptr<Vestal> ptrFirstVestal = make_shared<Vestal>("Vestal #1",3);
+    shared_ptr<Vestal> ptrSecondVestal = make_shared<Vestal>("Vestal #2", 4);
+    shared_ptr<Crusader> ptrFirstCrusader = make_shared<Crusader>("Crusader #1", 1);
+    shared_ptr<Crusader> ptrSecondCrusader = make_shared<Crusader>("Crusader #2", 2);
+    shared_ptr<Bone_Defender> ptrFirstBoneD = make_shared<Bone_Defender>("Bone Defender #1", 2);
+    shared_ptr<Bone_Defender> ptrSecondBoneD = make_shared<Bone_Defender>("Bone Defender #2", 4);
+    shared_ptr<Bone_Soldier> ptrFirstBoneS = make_shared<Bone_Soldier>("Bone Soldier #1", 1);
+    shared_ptr<Bone_Soldier> ptrSecondBoneS = make_shared<Bone_Soldier>("Bone Soldier #2", 3);
 
     //Crusader Skills
     Smite Skill_Smite;//Attack
@@ -641,407 +556,331 @@ int main() {
     Dead_Weight Skill_Dead_Weight;//Attack
     Knitting_Bones Skill_Knitting_Bones;//Utility (Heal)
 
-    MoveSkill Forward1;
-    MoveSkill Backward1;
 
+    //Unit attackOrderArray[8];
+    //shared_ptr<Unit[]> attackOrderArray = make_shared<Unit[]>(8);
+    shared_ptr<Unit> attackOrderArray[8];
 
-    Unit attackOrderArray[8];attackOrderArray[0] = secondVestal;attackOrderArray[1] = firstVestal;
-    attackOrderArray[2] = secondCrusader;attackOrderArray[3] = firstCrusader;attackOrderArray[4] = firstBoneS;
-    attackOrderArray[5] = firstBoneD;attackOrderArray[6] = secondBoneS;attackOrderArray[7] = secondBoneD;
+    vector< shared_ptr<Hero> >heroes;
+    vector<shared_ptr<Monster>> monsters;
 
-    int speedtemp = 0;
-    Crusader temp("temp",0);
-	for(int i=0;i<8;i++)
-		for(int j=0;j<8;j++){
-            if(attackOrderArray[j].getSpeed() + randSpeeds[j] >attackOrderArray[j+1].getSpeed() + randSpeeds[j+1]){
-                temp.setName(attackOrderArray[j].getName());
-                temp.setSpeed(attackOrderArray[j].getSpeed());
-                temp.setPosition(attackOrderArray[j].getPosition());
-                attackOrderArray[j].setName(attackOrderArray[j+1].getName());
-                attackOrderArray[j].setSpeed(attackOrderArray[j+1].getSpeed());
-                attackOrderArray[j].setPosition(attackOrderArray[j+1].getPosition());
-                attackOrderArray[j+1].setName(temp.getName());
-                attackOrderArray[j+1].setSpeed(temp.getSpeed());
-                attackOrderArray[j+1].setPosition(temp.getPosition());
-                speedtemp = randSpeeds[j];
-                randSpeeds[j] = randSpeeds[j+1];
-                randSpeeds[j+1] = speedtemp;
-		}
-	}
-
-
-    vector<Hero>heroes;
-    vector<Monster>monsters;
-
-    vector<Hero>::iterator heroPtr;
+    vector<shared_ptr<Hero>>::iterator heroPtr;
     heroPtr = heroes.begin();
 
-    vector<Monster>::iterator monsterPtr;
+    vector<shared_ptr<Monster>>::iterator monsterPtr;
     monsterPtr = monsters.begin();
 
-    heroes.push_back(secondVestal);heroes.push_back(firstVestal);heroes.push_back(secondCrusader);heroes.push_back(firstCrusader);
-    monsters.push_back(firstBoneS);monsters.push_back(firstBoneD);monsters.push_back(secondBoneS);monsters.push_back(secondBoneD);
+    monsters.push_back(ptrFirstBoneS);
+    monsters.push_back(ptrFirstBoneD);
+    monsters.push_back(ptrSecondBoneS);
+    monsters.push_back(ptrSecondBoneD);
+
+    heroes.push_back(ptrFirstVestal);
+    heroes.push_back(ptrSecondVestal);
+    heroes.push_back(ptrFirstCrusader);
+    heroes.push_back(ptrSecondCrusader);
+
+    attackOrderArray[0] = ptrSecondVestal;
+    attackOrderArray[1] = ptrFirstVestal;
+    attackOrderArray[2] = ptrSecondCrusader;
+    attackOrderArray[3] = ptrFirstCrusader;
+    attackOrderArray[4] = ptrFirstBoneS;
+    attackOrderArray[5] = ptrFirstBoneD;
+    attackOrderArray[6] = ptrSecondBoneS;
+    attackOrderArray[7] = ptrSecondBoneD;
+
+
+    int randSpeed;
+    shared_ptr<Unit>temp;
+    // Increase speeds with random number
+    for(int i=0;i<8;i++) {
+        randSpeed = rand() % 8 + 1;
+        attackOrderArray[i]->increaseSpeed(randSpeed);
+        // cout << i << ": " << attackOrderArray[i]->getName() << " " <<attackOrderArray[i]->getSpeed() << " " << endl;
+    }
+
+    for(int i=0;i<7;i++) {
+        for (int j = 0; j < 7; j++) {
+            if (attackOrderArray[j]->getSpeed() >
+                attackOrderArray[j + 1]->getSpeed()) {
+
+                temp = attackOrderArray[j];
+                attackOrderArray[j] = attackOrderArray[j+1];
+                attackOrderArray[j+1] = temp;
+            }
+        }
+    }
+    // Test
+//    for(int i=0;i<8;i++) {
+//        //cout << i << ": " << attackOrderArray[i]->getName() << " " <<attackOrderArray[i]->getHp() << endl;
+//        cout << attackOrderArray[i]->getSpeed() << " " ;
+//    }
 
     int numberOfRound = 1;
     int numberOfSkill;
     bool gameover = false;
 
-do {
-    cout<<"---R O U N D  "<<numberOfRound<<"---"<<endl;
-    cout<<endl;
-    for(int i = 7;i>=0;i--){
-    if(attackOrderArray[i].isAlive() == 1 && attackOrderArray[i].isStun() == 0){
-        cout<<attackOrderArray[i].getName()<<"'s turn! "<<"Select a skill!"<<endl;
+    do {
+        cout<<"---R O U N D  "<<numberOfRound<<"---"<<endl;
+        cout<<endl;
 
-        if(attackOrderArray[i].getName() == "Vestal #1"||attackOrderArray[i].getName() == "Vestal #2"){
-        if(attackOrderArray[i].getPosition() == 1){
-            int target;
-            cout<<"1 : Mace Bash (Attack)"<<endl;
-            cout<<attackOrderArray[i].getName()<<" at Position 1"<<endl;
-            cout<<"Mace Bash Selected automatically!"<<endl;
-            cout<<"Select a target to attack!"<<endl;
-            cout<<"1-"<<monsters[0].getName()<<"("<<monsters[0].getHp()<<")"<<endl;
-            cout<<"2-"<<monsters[1].getName()<<"("<<monsters[1].getHp()<<")"<<endl;
-            cout<<"Number of Target : ";
-            cin>>target;
-            cout<<"Using Mace Bash to attack to "<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
-            monsters[target-1].setHp(Skill_Mace_Bash.attackFunc(attackOrderArray[i],monsters[target-1]));
-            cout<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
-            if(monsters[target-1].getHp() == 0){
-                monsters[target-1].setAlive(0);
-                for(int i = 7 ; i>=0;i--){
-                    if(attackOrderArray[i].getName()==monsters[target-1].getName()){
-                        attackOrderArray[i].setAlive(0);
+        for(int i = 7;i>=0;i--){
+            if(attackOrderArray[i]->isAlive() == true){
+                cout<<attackOrderArray[i]->getName()<<"'s turn! "<<"Select a skill!"<<endl;
+                /*for(int j = 0;j<8;j++){
+                    cout<<attackOrderArray[j].getName()<<" ";
+                    cout<<attackOrderArray[j].getSpeed()+randSpeeds[j]<<endl;
+
+                }*//*Test için duruyor*/
+                if(attackOrderArray[i]->getName() == "Vestal #1" || attackOrderArray[i]->getName() == "Vestal #2"){
+                    if(attackOrderArray[i]->getPosition() == 1){
+                        int target;
+                        cout<<"1 : Mace Bash (Attack)"<<endl;
+                        cout<<attackOrderArray[i]->getName()<<" at Position 1"<<endl;
+                        cout<<"Mace Bash Selected automatically!"<<endl;
+                        cout<<"Select a target to attack!"<<endl;
+                        cout<<"1-"<<monsters[0]->getName()<<"("<<monsters[0]->getHp()<<")"<<endl;
+                        cout<<"2-"<<monsters[1]->getName()<<"("<<monsters[1]->getHp()<<")"<<endl;
+                        cout<<"Number of Target : ";
+                        cin>>target;
+                        cout<<"Using Mace Bash to attack to "<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
+                        //monsters[target-1].setHp(Skill_Mace_Bash.attackFunc(&attackOrderArray[i],&monsters[target-1]));
+                        Skill_Mace_Bash.attackFunc(attackOrderArray[i],monsters[target-1]);
+                        cout<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
+
                     }
-                }
-                cout<<monsters[target-1].getName()<<" died !"<<endl;
-            }
+                    else if(attackOrderArray[i]->getPosition() == 2){
+                        cout<<"1 : Mace Bash (Attack)"<<endl;
+                        cout<<"2 : Dazzling Light (Attack)"<<endl;
+                        cout<<"4 : Divine Comfort (Utility)"<<endl;
+                        cout<<"Number of Skill : ";
+                        cin>>numberOfSkill;
+                        if(numberOfSkill==3){
+                            cout<<"Number of Skill selected 4 automatically because your selection is not an option! "<<endl;
+                            numberOfSkill = 4;
 
-        }
-        else if(attackOrderArray[i].getPosition() == 2){
-            cout<<"1 : Mace Bash (Attack)"<<endl;
-            cout<<"2 : Dazzling Light (Attack)"<<endl;
-            cout<<"4 : Divine Comfort (Utility)"<<endl;
-            cout<<"Number of Skill : ";
-            cin>>numberOfSkill;
-            if(numberOfSkill==3){
-                cout<<"Number of Skill selected 4 automatically because your selection is not an option! "<<endl;
-                numberOfSkill = 4;
+                        }
 
-            }
-
-        }
-        else if(attackOrderArray[i].getPosition() == 3 || attackOrderArray[i].getPosition() == 4){
-            cout<<"2 : Dazzling Light (Attack)"<<endl;
-            cout<<"3 : Divine Grace (Utility)"<<endl;
-            cout<<"4 : Divine Comfort (Utility)"<<endl;
-            cout<<"Number of Skill : ";
-            cin>>numberOfSkill;
-            if(numberOfSkill==1){
-                cout<<"Number of Skill selected 2 automatically because your selection is not an option! "<<endl;
-                numberOfSkill = 2;
-
-            }
-
-        }
-
-        if(numberOfSkill == 1){
-            int target;
-            cout<<"Mace Bash Selected!"<<endl;
-            cout<<"Select a target to attack!"<<endl;
-            cout<<"1-"<<monsters[0].getName()<<"(Hp : "<<monsters[0].getHp()<<")"<<endl;
-            cout<<"2-"<<monsters[1].getName()<<"(Hp : "<<monsters[1].getHp()<<")"<<endl;
-            cout<<"Number of Target : ";
-            cin>>target;
-            if(target==3||target==4){
-                cout<<"Number of Target selected 1 automatically because your selection is not an option! "<<endl;
-                target = 1;
-
-            }
-            cout<<"Using Mace Bash to attack to "<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
-            monsters[target-1].setHp(Skill_Mace_Bash.attackFunc(attackOrderArray[i],monsters[target-1]));
-            cout<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
-            if(monsters[target-1].getHp() == 0){
-                monsters[target-1].setAlive(0);
-                cout<<monsters[target-1].getName()<<" died !"<<endl;
-            }
-        }
-        else if(numberOfSkill == 2){
-            int target;
-            cout<<"Dazzling Light Selected!"<<endl;
-            cout<<"Select a target to attack!"<<endl;
-            cout<<"1-"<<monsters[0].getName()<<"(Hp : "<<monsters[0].getHp()<<")"<<endl;
-            cout<<"2-"<<monsters[1].getName()<<"(Hp : "<<monsters[1].getHp()<<")"<<endl;
-            cout<<"3-"<<monsters[2].getName()<<"(Hp : "<<monsters[2].getHp()<<")"<<endl;
-            cout<<"Number of Target : ";
-            cin>>target;
-            if(target==4){
-                cout<<"Number of Target selected 1 automatically because your selection is not an option! "<<endl;
-                target = 1;
-
-            }
-            cout<<"Using Dazzling Light to attack to "<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
-            monsters[target-1].setHp(Skill_Dazzling_Light.attackFunc(attackOrderArray[i],monsters[target-1]));
-            monsters[target-1].setStun(Skill_Dazzling_Light.stunFunc(attackOrderArray[i],monsters[target-1]));
-            cout<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
-            if(monsters[target-1].getHp() == 0){
-                monsters[target-1].setAlive(0);
-                for(int i = 7 ; i>=0;i--){
-                    if(attackOrderArray[i].getName()==monsters[target-1].getName()){
-                        attackOrderArray[i].setAlive(0);
                     }
-                }
-                cout<<monsters[target-1].getName()<<" died !"<<endl;
-            }
-        }
-        else if(numberOfSkill == 3){
-            int target;
-            cout<<"Divine Grace Selected!"<<endl;
-            cout<<"Select a target to heal!"<<endl;
-            cout<<"1-"<<heroes[0].getName()<<"(Hp : "<<heroes[0].getHp()<<")"<<endl;
-            cout<<"2-"<<heroes[1].getName()<<"(Hp : "<<heroes[1].getHp()<<")"<<endl;
-            cout<<"3-"<<heroes[2].getName()<<"(Hp : "<<heroes[2].getHp()<<")"<<endl;
-            cout<<"4-"<<heroes[3].getName()<<"(Hp : "<<heroes[3].getHp()<<")"<<endl;
-            cout<<"Number of Target : ";
-            cin>>target;
-            int healAmount = rand() % 2 + 4;
-            cout<<"Using Divine Grace to heal to "<<heroes[target-1].getName()<<"(Hp : "<<heroes[target-1].getHp()<<")"<<" by "<<healAmount<<endl;
-            heroes[target-1].setHp(heroes[target-1].getHp()+healAmount);
-            if(heroes[target-1].getHp()>heroes[target-1].getMaxHp()){
-                heroes[target-1].setHp(heroes[target-1].getMaxHp());
-            }
-            cout<<heroes[target-1].getName()<<"(Hp : "<<heroes[target-1].getHp()<<")"<<endl;
-        }
-        else if(numberOfSkill == 4){
-            int healAmount = rand() % 3 + 1;
-            cout<<"Divine Comfort Selected!"<<endl;
-            cout<<"Healing all Heroes by "<<healAmount<<endl;
-            for(int j = 0 ; j<4 ; j++){
-                heroes[j].setHp(heroes[j].getHp()+healAmount);
-                if(heroes[j].getHp() > heroes[j].getMaxHp()){
-                    heroes[j].setHp(heroes[j].getMaxHp());
-                }
-            }
-            for(int j = 3;j>=0;j--){
-               cout<<heroes[j].getName()<<"(Hp : "<<heroes[j].getHp()<<")  ";
-            }
-            cout<<endl;
+                    else if(attackOrderArray[i]->getPosition() == 3 || attackOrderArray[i]->getPosition() == 4){
+                        cout<<"2 : Dazzling Light (Attack)"<<endl;
+                        cout<<"3 : Divine Grace (Utility)"<<endl;
+                        cout<<"4 : Divine Comfort (Utility)"<<endl;
+                        cout<<"Number of Skill : ";
+                        cin>>numberOfSkill;
+                        if(numberOfSkill==1){
+                            cout<<"Number of Skill selected 2 automatically because your selection is not an option! "<<endl;
+                            numberOfSkill = 2;
 
-        }
-        cout<<"----------------------------------------"<<endl;
-        }
+                        }
 
-        else if(attackOrderArray[i].getName() == "Crusader #1"||attackOrderArray[i].getName() == "Crusader #2"){
-        if(attackOrderArray[i].getPosition() == 1 || attackOrderArray[i].getPosition() == 2){
-            cout<<"1 : Smite (Attack)"<<endl;
-            cout<<"2 : Stunning Blow (Attack)"<<endl;
-            cout<<"3 : Bulwark of Faith (Utility)"<<endl;
-            cout<<"Number of Skill : ";
-            cin>>numberOfSkill;
-            if(numberOfSkill==4){
-                cout<<"Number of Skill selected 1 automatically because your selection is not an option! "<<endl;
-                numberOfSkill = 1;
-
-            }
-        }
-        else{
-            int target;
-            cout<<"4 : Holy Lance (Attack)"<<endl;
-            cout<<"Holy Lance selected automatically!"<<endl;
-            cout<<"Select a target to attack!"<<endl;
-            cout<<"2-"<<monsters[1].getName()<<"(Hp : "<<monsters[1].getHp()<<")"<<endl;
-            cout<<"3-"<<monsters[2].getName()<<"(Hp : "<<monsters[2].getHp()<<")"<<endl;
-            cout<<"4-"<<monsters[3].getName()<<"(Hp : "<<monsters[3].getHp()<<")"<<endl;
-            cout<<"Number of Target : ";
-            cin>>target;
-            if(target==1){
-                cout<<"Number of Target selected 2 automatically because your selection is not an option! "<<endl;
-                target = 2;
-
-            }
-            cout<<"Using Holy Lance to attack to "<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
-            monsters[target-1].setHp(Skill_Holy_Lance.attackFunc(attackOrderArray[i],monsters[target-1]));
-            cout<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
-
-            heroes[i].setPosition(Forward1.MoveFuncForward1(heroes[i].getPosition())); // BUNUN YERI YANLIS OLABILIR
-
-            if(monsters[target-1].getHp() == 0){
-                monsters[target-1].setAlive(0);
-                for(int i = 7 ; i>=0;i--){
-                    if(attackOrderArray[i].getName()== monsters[target-1].getName()){
-                        attackOrderArray[i].setAlive(0);
                     }
-                }
-                cout<<monsters[target-1].getName()<<" died !"<<endl;
-            }
-        }
 
-        if(numberOfSkill == 1){
-            int target;
-            cout<<"Smite Selected!"<<endl;
-            cout<<"Select a target to attack!"<<endl;
-            cout<<"1-"<<monsters[0].getName()<<"(Hp : "<<monsters[0].getHp()<<")"<<endl;
-            cout<<"2-"<<monsters[1].getName()<<"(Hp : "<<monsters[1].getHp()<<")"<<endl;
-            cout<<"Number of Target : ";
-            cin>>target;
-            if(target==3||target==4){
-                cout<<"Number of Target selected 1 automatically because your selection is not an option! "<<endl;
-                target = 1;
+                    if(numberOfSkill == 1){
+                        int target;
+                        cout<<"Mace Bash Selected!"<<endl;
+                        cout<<"Select a target to attack!"<<endl;
+                        cout<<"1-"<<monsters[0]->getName()<<"(Hp : "<<monsters[0]->getHp()<<")"<<endl;
+                        cout<<"2-"<<monsters[1]->getName()<<"(Hp : "<<monsters[1]->getHp()<<")"<<endl;
+                        cout<<"Number of Target : ";
+                        cin>>target;
+                        if(target==3||target==4){
+                            cout<<"Number of Target selected 1 automatically because your selection is not an option! "<<endl;
+                            target = 1;
 
-            }
-            cout<<"Using Smite on "<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
-            monsters[target-1].setHp(Skill_Smite.attackFunc(attackOrderArray[i],monsters[target-1]));
-            cout<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
-            if(monsters[target-1].getHp() == 0){
-                monsters[target-1].setAlive(0);
-                for(int i = 7 ; i>=0;i--){
-                    if(attackOrderArray[i].getName()==monsters[target-1].getName()){
-                        attackOrderArray[i].setAlive(0);
+                        }
+                        cout<<"Using Mace Bash to attack to "<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
+                        //monsters[target-1].setHp(Skill_Mace_Bash.attackFunc(&attackOrderArray[i],&monsters[target-1]));
+                        Skill_Mace_Bash.attackFunc(attackOrderArray[i],monsters[target-1]);
+                        cout<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
                     }
-                }
-                cout<<monsters[target-1].getName()<<" died !"<<endl;
-            }
-        }
-        else if(numberOfSkill == 2){
-            int target;
-            cout<<"Stunning Blow Selected!"<<endl;
-            cout<<"Select a target to attack!"<<endl;
-            cout<<"1-"<<monsters[0].getName()<<"(Hp : "<<monsters[0].getHp()<<")"<<endl;
-            cout<<"2-"<<monsters[1].getName()<<"(Hp : "<<monsters[1].getHp()<<")"<<endl;
-            cout<<"Number of Target : ";
-            cin>>target;
-            if(target==3||target==4){
-                cout<<"Number of Target selected 1 automatically because your selection is not an option! "<<endl;
-                target = 1;
+                    else if(numberOfSkill == 2){
+                        int target;
+                        cout<<"Dazzling Light Selected!"<<endl;
+                        cout<<"Select a target to attack!"<<endl;
+                        cout<<"1-"<<monsters[0]->getName()<<"(Hp : "<<monsters[0]->getHp()<<")"<<endl;
+                        cout<<"2-"<<monsters[1]->getName()<<"(Hp : "<<monsters[1]->getHp()<<")"<<endl;
+                        cout<<"3-"<<monsters[2]->getName()<<"(Hp : "<<monsters[2]->getHp()<<")"<<endl;
+                        cout<<"Number of Target : ";
+                        cin>>target;
+                        if(target==4){
+                            cout<<"Number of Target selected 1 automatically because your selection is not an option! "<<endl;
+                            target = 1;
 
-            }
-            cout<<"Using Stunning Blow on "<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
-            monsters[target-1].setHp(Skill_Stunning_Blow.attackFunc(attackOrderArray[i],monsters[target-1]));
-            monsters[target-1].setStun(Skill_Stunning_Blow.stunFunc(attackOrderArray[i],monsters[target-1]));
-            cout<<monsters[target-1].getName()<<"(Hp : "<<monsters[target-1].getHp()<<")"<<endl;
-            if(monsters[target-1].getHp() == 0){
-                monsters[target-1].setAlive(0);
-                for(int i = 7 ; i>=0;i--){
-                    if(attackOrderArray[i].getName()==monsters[target-1].getName()){
-                        attackOrderArray[i].setAlive(0);
+                        }
+                        cout<<"Using Dazzling Light to attack to "<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
+                        //monsters[target-1].setHp(Skill_Dazzling_Light.attackFunc(&attackOrderArray[i],&monsters[target-1]));
+                        Skill_Dazzling_Light.attackFunc(attackOrderArray[i],monsters[target-1]);
+                        cout<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
                     }
+                    else if(numberOfSkill == 3){
+                        int target;
+                        cout<<"Divine Grace Selected!"<<endl;
+                        cout<<"Select a target to heal!"<<endl;
+                        cout<<"1-"<<heroes[0]->getName()<<"(Hp : "<<heroes[0]->getHp()<<")"<<endl;
+                        cout<<"2-"<<heroes[1]->getName()<<"(Hp : "<<heroes[1]->getHp()<<")"<<endl;
+                        cout<<"3-"<<heroes[2]->getName()<<"(Hp : "<<heroes[2]->getHp()<<")"<<endl;
+                        cout<<"4-"<<heroes[3]->getName()<<"(Hp : "<<heroes[3]->getHp()<<")"<<endl;
+                        cout<<"Number of Target : ";
+                        cin>>target;
+                        int healAmount = rand() % 2 + 4;
+                        cout<<"Using Divine Grace to heal to "<<heroes[target-1]->getName()<<"(Hp : "<<heroes[target-1]->getHp()<<")"<<" by "<<healAmount<<endl;//After Heal function
+                    }
+                    else if(numberOfSkill == 4){
+                        int healAmount = rand() % 3 + 1;
+                        cout<<"Divine Comfort Selected!"<<endl;
+                        cout<<"Healing all Heroes by "<<healAmount<<endl;
+                    }
+                    cout<<"----------------------------------------"<<endl;
                 }
-                cout<<monsters[target-1].getName()<<" died !"<<endl;
 
+                else if(attackOrderArray[i]->getName() == "Crusader #1"||attackOrderArray[i]->getName() == "Crusader #2"){
+                    if(attackOrderArray[i]->getPosition() == 1 || attackOrderArray[i]->getPosition() == 2){
+                        cout<<"1 : Smite (Attack)"<<endl;
+                        cout<<"2 : Stunning Blow (Attack)"<<endl;
+                        cout<<"3 : Bulwark of Faith (Utility)"<<endl;
+                        cout<<"Number of Skill : ";
+                        cin>>numberOfSkill;
+                        if(numberOfSkill==4){
+                            cout<<"Number of Skill selected 1 automatically because your selection is not an option! "<<endl;
+                            numberOfSkill = 1;
+
+                        }
+                    }
+                    else{
+                        int target;
+                        cout<<"4 : Holy Lance (Attack)"<<endl;
+                        cout<<"Holy Lance selected automatically!"<<endl;
+                        cout<<"Select a target to attack!"<<endl;
+                        cout<<"2-"<<monsters[1]->getName()<<"(Hp : "<<monsters[1]->getHp()<<")"<<endl;
+                        cout<<"3-"<<monsters[2]->getName()<<"(Hp : "<<monsters[2]->getHp()<<")"<<endl;
+                        cout<<"4-"<<monsters[3]->getName()<<"(Hp : "<<monsters[3]->getHp()<<")"<<endl;
+                        cout<<"Number of Target : ";
+                        cin>>target;
+                        if(target==1){
+                            cout<<"Number of Target selected 2 automatically because your selection is not an option! "<<endl;
+                            target = 2;
+
+                        }
+                        cout<<"Using Holy Lance to attack to "<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
+                        //monsters[target-1].setHp(Skill_Holy_Lance.attackFunc(&attackOrderArray[i], &monsters[target-1]));
+                        Skill_Holy_Lance.attackFunc(attackOrderArray[i], monsters[target-1]);
+                        cout<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
+                    }
+
+                    if(numberOfSkill == 1){
+                        int target;
+                        cout<<"Smite Selected!"<<endl;
+                        cout<<"Select a target to attack!"<<endl;
+                        cout<<"1-"<<monsters[0]->getName()<<"(Hp : "<<monsters[0]->getHp()<<")"<<endl;
+                        cout<<"2-"<<monsters[1]->getName()<<"(Hp : "<<monsters[1]->getHp()<<")"<<endl;
+                        cout<<"Number of Target : ";
+                        cin>>target;
+                        if(target==3||target==4){
+                            cout<<"Number of Target selected 1 automatically because your selection is not an option! "<<endl;
+                            target = 1;
+
+                        }
+                        cout<<"Using Smite on "<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
+                        //monsters[target-1].setHp(Skill_Smite.attackFunc(&attackOrderArray[i], &monsters[target-1]));
+                        Skill_Smite.attackFunc(attackOrderArray[i], monsters[target-1]);
+                        cout<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
+                    }
+                    else if(numberOfSkill == 2){
+                        int target;
+                        cout<<"Stunning Blow Selected!"<<endl;
+                        cout<<"Select a target to attack!"<<endl;
+                        cout<<"1-"<<monsters[0]->getName()<<"(Hp : "<<monsters[0]->getHp()<<")"<<endl;
+                        cout<<"2-"<<monsters[1]->getName()<<"(Hp : "<<monsters[1]->getHp()<<")"<<endl;
+                        cout<<"Number of Target : ";
+                        cin>>target;
+                        if(target==3||target==4){
+                            cout<<"Number of Target selected 1 automatically because your selection is not an option! "<<endl;
+                            target = 1;
+
+                        }
+                        cout<<"Using Stunning Blow on "<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
+                        // monsters[target-1].setHp(Skill_Stunning_Blow.attackFunc(&attackOrderArray[i], &monsters[target-1]));
+                        Skill_Stunning_Blow.attackFunc(attackOrderArray[i], monsters[target-1]);
+                        cout<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
+                    }
+                    else if(numberOfSkill == 3){
+                        cout<<"Bulwark of Faith Selected!"<<endl;
+                        cout<<"Using Bulwark of Faith on "<<attackOrderArray[i]->getName()<<", +20 protection for 3 round."<<endl;
+
+                    }
+                    cout<<"----------------------------------------"<<endl;
+                }
+
+                else if(attackOrderArray[i]->getName()=="Bone Defender #1"||attackOrderArray[i]->getName() == "Bone Defender #2"){
+
+                    int numOfSkill = rand() % 3 + 1;
+                    int target = rand() % 2 + 1;
+                    int healMonster = rand() % 4 + 1;
+                    int randHealAmount = rand() % 1 + 3;
+                    if(numOfSkill==1){
+                        cout<<attackOrderArray[i]->getName()<<" is selected AxeBlade to attack to "<<heroes[4-target]->getName()<<endl;
+
+                        // heroes[4-target].setHp(Skill_Axeblade.attackFunc(&attackOrderArray[i],&heroes[4-target]));
+                        Skill_Axeblade.attackFunc(attackOrderArray[i],heroes[4-target]);
+                        cout<<heroes[4-target]->getName()<<"(Hp : "<<heroes[4-target]->getHp()<<")"<<endl;
+                    }
+                    else if(numOfSkill==2){
+                        cout<<attackOrderArray[i]->getName()<<" is selected Dead Weight to attack to "<<heroes[4-target]->getName()<<endl;
+
+                        // heroes[4-target].setHp(Skill_Dead_Weight.attackFunc(&attackOrderArray[i],&heroes[4-target]));
+                        Skill_Dead_Weight.attackFunc(attackOrderArray[i],heroes[4-target]);
+                        cout<<heroes[4-target]->getName()<<"(Hp : "<<heroes[4-target]->getHp()<<")"<<endl;
+                    }
+                    else if(numOfSkill==3){
+                        cout<<attackOrderArray[i]->getName()<<" is selected Knitting Bones to heal to "<<monsters[healMonster]->getName()<<" by " <<randHealAmount<<endl;
+                    }
+                    cout<<"----------------------------------------"<<endl;
+
+                }
+
+                else if(attackOrderArray[i]->getName()=="Bone Soldier #1"||attackOrderArray[i]->getName() == "Bone Soldier #2"){
+
+                    int numOfSkill = rand() % 2 + 1;
+                    int target = rand() % 2 + 1;
+                    int target2 = rand() % 3 + 1;
+
+                    if(numOfSkill==1){
+                        cout<<attackOrderArray[i]->getName()<<" is selected Graveyard Slash to attack to "<<heroes[4-target2]->getName()<<endl;
+
+                        // heroes[4-target].setHp(Skill_Graveyard_Slash.attackFunc(&attackOrderArray[i],&heroes[4-target]));
+                        Skill_Graveyard_Slash.attackFunc(attackOrderArray[i],heroes[4-target]);
+                        cout<<heroes[4-target]->getName()<<"(Hp : "<<heroes[4-target]->getHp()<<")"<<endl;
+
+                    }
+                    else if(numOfSkill==2){
+                        cout<<attackOrderArray[i]->getName()<<" is selected Graveyard Stumble to attack to "<<heroes[4-target]->getName()<<endl;
+
+                        // heroes[4-target].setHp(Skill_Graveyard_Stumble.attackFunc(&attackOrderArray[i],&heroes[4-target]));
+                        Skill_Graveyard_Stumble.attackFunc(attackOrderArray[i],heroes[4-target]);
+                        cout<<heroes[4-target]->getName()<<"(Hp : "<<heroes[4-target]->getHp()<<")"<<endl;
+
+                        cout<<"And "<<attackOrderArray[i]->getName()<<" moves 1 step forward!"<<endl;
+                    }
+                    cout<<"----------------------------------------"<<endl;
+                }
+
+            }
+            else {
+                cout << "Character:" << attackOrderArray[i]->getName() << " is dead." << endl;
             }
         }
-        else if(numberOfSkill == 3){
-            cout<<"Bulwark of Faith Selected!"<<endl;
-            cout<<"Using Bulwark of Faith on "<<attackOrderArray[i].getName()<<", +20 protection for 3 round (1 fight)."<<endl;
-            attackOrderArray[i].setProt(0);
-            attackOrderArray[i].setProt(attackOrderArray[i].getProt()+20);
-            attackOrderArray[i].setProtTurn(3);
-            cout<<attackOrderArray[i].getName()<<"(Protection : "<<attackOrderArray[i].getProt()<<")"<<endl;
 
-        }
-        cout<<"----------------------------------------"<<endl;
+        if(heroes[0]->getHp()+heroes[1]->getHp()+heroes[2]->getHp()+heroes[3]->getHp() == 0 ||
+           monsters[0]->getHp()+monsters[1]->getHp()+monsters[2]->getHp()+monsters[3]->getHp() == 0){
+            gameover = true;
         }
 
-        else if(attackOrderArray[i].getName()=="Bone Defender #1"||attackOrderArray[i].getName() == "Bone Defender #2"){
+        numberOfRound++;
 
-            int numOfSkill = rand() % 3 + 1;
-            int target = rand() % 2 + 1;
-            int healMonster = rand() % 4 + 1;
-            int randHealAmount = rand() % 1 + 3;
-            if(numOfSkill==1){
-                cout<<attackOrderArray[i].getName()<<" is selected AxeBlade to attack to "<<heroes[4-target].getName()<<endl;
+    } while (gameover == false);
 
-                heroes[4-target].setHp(Skill_Axeblade.attackFunc(attackOrderArray[i],heroes[4-target]));
-                cout<<heroes[4-target].getName()<<"(Hp : "<<heroes[4-target].getHp()<<")"<<endl;
-                if(heroes[4-target].getHp() == 0){
-                heroes[4-target].setAlive(heroes[4-target].dying(heroes[4-target]));
-                }
-                if(heroes[4-target].getProtTurn() != 0 ){
-                    heroes[4-target].setProtTurn(0);
-                }
-            }
-            else if(numOfSkill==2){
-                cout<<attackOrderArray[i].getName()<<" is selected Dead Weight to attack to "<<heroes[4-target].getName()<<endl;
-
-                heroes[4-target].setHp(Skill_Dead_Weight.attackFunc(attackOrderArray[i],heroes[4-target]));
-                heroes[4-target].setStun(Skill_Dead_Weight.stunFunc(attackOrderArray[i],heroes[4-target]));
-                cout<<heroes[4-target].getName()<<"(Hp : "<<heroes[4-target].getHp()<<")"<<endl;
-                if(heroes[4-target].getHp() == 0){
-                heroes[4-target].setAlive(heroes[4-target].dying(heroes[4-target]));
-                }
-                if(heroes[4-target].getProtTurn() != 0 ){
-                    heroes[4-target].setProtTurn(0);
-                }
-            }
-            else if(numOfSkill==3){
-                cout<<attackOrderArray[i].getName()<<" is selected Knitting Bones to heal to "<<monsters[healMonster].getName()<<" by " <<randHealAmount<<endl;
-                cout<<monsters[healMonster].getName()<<"(Hp : "<<monsters[healMonster].getHp()<<")"<<endl;
-            }
-            cout<<"----------------------------------------"<<endl;
-
-        }
-
-        else if(attackOrderArray[i].getName()=="Bone Soldier #1"||attackOrderArray[i].getName() == "Bone Soldier #2"){
-
-            int numOfSkill = rand() % 2 + 1;
-            int target = rand() % 2 + 1;
-            int target2 = rand() % 3 + 1;
-
-            if(numOfSkill==1){
-                cout<<attackOrderArray[i].getName()<<" is selected Graveyard Slash to attack to "<<heroes[4-target2].getName()<<endl;
-
-                heroes[4-target].setHp(Skill_Graveyard_Slash.attackFunc(attackOrderArray[i],heroes[4-target]));
-                cout<<heroes[4-target].getName()<<"(Hp : "<<heroes[4-target].getHp()<<")"<<endl;
-                if(heroes[4-target].getHp() == 0){
-                heroes[4-target].setAlive(heroes[4-target].dying(heroes[4-target]));
-                }
-                if(heroes[4-target].getProtTurn() != 0 ){
-                    heroes[4-target].setProtTurn(0);
-                }
-
-            }
-            else if(numOfSkill==2){
-                cout<<attackOrderArray[i].getName()<<" is selected Graveyard Stumble to attack to "<<heroes[4-target].getName()<<endl;
-
-                heroes[4-target].setHp(Skill_Graveyard_Stumble.attackFunc(attackOrderArray[i],heroes[4-target]));
-                cout<<heroes[4-target].getName()<<"(Hp : "<<heroes[4-target].getHp()<<")"<<endl;
-
-                heroes[i].setPosition(Forward1.MoveFuncForward1(heroes[i].getPosition())); // YERI YANLIS OLABILR E.
-                
-                if(heroes[4-target].getHp() == 0){
-                heroes[4-target].setAlive(heroes[4-target].dying(heroes[4-target]));
-                }
-                if(heroes[4-target].getProtTurn() != 0 ){
-                    heroes[4-target].setProtTurn(0);
-                }
-
-                cout<<attackOrderArray[i].getName()<<" moves 1 step forward!"<<endl;
-            }
-            cout<<"----------------------------------------"<<endl;
-        }
-    }
-    else if (attackOrderArray[i].isStun() == 1){
-        cout<<attackOrderArray[i].getName()<<" can not Attack because has Stun."<<endl;
-        cout<<"------------------------------------------"<<endl;
-    }
-    if(attackOrderArray[i].getProtTurn() != 0 ){
-    attackOrderArray[i].setProtTurn(attackOrderArray[i].getProtTurn()-1);
-    }
-}
-
-for(int i = 0;i<=7;i++){
-    attackOrderArray[i].setStun(0);
-}
-if(heroes[0].getHp()+heroes[1].getHp()+heroes[2].getHp()+heroes[3].getHp() == 0 ){cout<<"End of Game , LOSE !"<<endl;gameover = true;}
-if(monsters[0].getHp()+monsters[1].getHp()+monsters[2].getHp()+monsters[3].getHp() == 0){cout<<"End of Game , WİN !"<<endl;gameover = true;}
-numberOfRound++;
-
-
-} while (gameover == false);
-
-cout<<"!End of Game! "<<endl;
-
-
+    cout<<"!End of Game! "<<endl;
 
     return 0;
 }
