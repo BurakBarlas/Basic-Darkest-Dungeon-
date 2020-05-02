@@ -338,7 +338,7 @@ public:
                 int stunChange = 20 + stunBase - defender->getStunResist();
                 randomNumber = rand() % 101;
 
-                if(0 <= stunChange) { //1=randomNumber
+                if(randomNumber <= stunChange) {
                     defender->setStun(true);
                 }
                 else{
