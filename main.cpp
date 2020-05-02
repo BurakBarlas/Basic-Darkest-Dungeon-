@@ -98,7 +98,6 @@ public:
 
     void setStun(int stun) {
         this->stun = stun;
-        cout << name << " stunned for this round." << endl;
     }
 
     void getDamage(int damage) {
@@ -625,7 +624,8 @@ int main() {
         cout<<endl;
 
         for(int i = 7;i>=0;i--){
-            if(attackOrderArray[i]->isAlive() == true){
+            if(attackOrderArray[i]->isAlive() == true && attackOrderArray[i]->isStun() == false){
+
                 cout<<attackOrderArray[i]->getName()<<"'s turn! "<<"Select a skill!"<<endl;
                 /*for(int j = 0;j<8;j++){
                     cout<<attackOrderArray[j].getName()<<" ";
@@ -865,6 +865,11 @@ int main() {
                     cout<<"----------------------------------------"<<endl;
                 }
 
+            }
+
+            else if(attackOrderArray[i]->isAlive() == true && attackOrderArray[i]->isStun() == true){
+                cout << attackOrderArray[i]->getName() << " stunned for this round." << endl;
+                attackOrderArray[i]->setStun(false);
             }
             else {
                 cout << "Character:" << attackOrderArray[i]->getName() << " is dead." << endl;
