@@ -475,17 +475,20 @@ protected:
     int prot = 0;
     int protRound = 0;
 public:
-    void utilityFunc(shared_ptr<Unit> healer,shared_ptr<Unit> target){
-        if(maxHp) {
-            double randomNumber = rand() % (maxHp-minHp) + minHp;
-            target->increaseHp(randomNumber);
-        }
-        if(prot) {
-            target->setProt(healer->getProt() + prot);
-            cout << target->getName() << " +20 Prot earned." << endl;
-            protRound = 1;
-        }
-        else{
+    void utilityFunc(shared_ptr<Unit> healer,shared_ptr<Unit> target) {
+        if (target->isAlive() == true) {
+            if (maxHp) {
+                double randomNumber = rand() % (maxHp - minHp) + minHp;
+                cout << randomNumber;
+                target->increaseHp(randomNumber);
+            }
+            if (prot) {
+                target->setProt(healer->getProt() + prot);
+                cout<<"Using Bulwark of Faith on "<< target->getName() <<", +20 protection for 3 round."<<endl;
+                protRound = 1;
+            }
+            else {
+            }
         }
     }
     void add() {
@@ -496,10 +499,18 @@ public:
 
 class Bulwark_Of_Faith: public UtilitySkill{
 public:
-    Bulwark_Of_Faith(){
+    Bulwark_Of_Faith() {
         prot = 20;
-        //+20 Prot for 3 round
+        bool active = false;
     }
+
+//        bool isActive(){
+//            return active;
+//        }
+
+
+    //+20 Prot for 3 round
+
 };
 class Divine_Grace: public UtilitySkill{
 public:
@@ -647,7 +658,6 @@ int main() {
                         cout<<"Number of Target : ";
                         cin>>target;
                         cout<<"Using Mace Bash to attack to "<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
-                        //monsters[target-1].setHp(Skill_Mace_Bash.attackFunc(&attackOrderArray[i],&monsters[target-1]));
                         Skill_Mace_Bash.attackFunc(attackOrderArray[i],monsters[target-1]);
                         cout<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
 
@@ -726,13 +736,20 @@ int main() {
                         cout<<"4-"<<heroes[3]->getName()<<"(Hp : "<<heroes[3]->getHp()<<")"<<endl;
                         cout<<"Number of Target : ";
                         cin>>target;
-                        int healAmount = rand() % 2 + 4;
-                        cout<<"Using Divine Grace to heal to "<<heroes[target-1]->getName()<<"(Hp : "<<heroes[target-1]->getHp()<<")"<<" by "<<healAmount<<endl;//After Heal function
+
+                        cout << heroes[target-1]->getName() << "Earned Hp: " << endl;
+                        Skill_Divine_Grace.utilityFunc(attackOrderArray[i],heroes[target-1]);
+                        cout<< heroes[target-1]->getName() << " " <<heroes[target-1]->getHp() <<endl;
+
                     }
                     else if(numberOfSkill == 4){
-                        int healAmount = rand() % 3 + 1;
+                        //int healAmount = rand() % 3 + 1;
                         cout<<"Divine Comfort Selected!"<<endl;
-                        cout<<"Healing all Heroes by "<<healAmount<<endl;
+                        cout<<"All units Healed " <<endl;
+                    }
+                    for (int j = 0; j < 7; ++j) {
+                        Skill_Divine_Comfort.utilityFunc(attackOrderArray[i],attackOrderArray[j]);
+                        cout << "All units healed. " << endl;
                     }
                     cout<<"----------------------------------------"<<endl;
                 }
@@ -809,13 +826,8 @@ int main() {
                     }
                     else if(numberOfSkill == 3){
                         cout<<"Bulwark of Faith Selected!"<<endl;
-                        cout<<"Using Bulwark of Faith on "<<attackOrderArray[i]->getName()<<", +20 protection for 3 round."<<endl;
-
+                        Skill_Bulwark_Of_Faith.utilityFunc(attackOrderArray[i], attackOrderArray[i]);
                     }
-                    cout << attackOrderArray[i]->getName()<< " selected Bulwark of Faith to heal to self."<< endl;
-                    Skill_Bulwark_Of_Faith.utilityFunc(attackOrderArray[i], attackOrderArray[i]);
-                    cout << attackOrderArray[i]->getName() << "(Hp : " << attackOrderArray[i]->getHp() <<")"<< endl;
-                    //cout << "deneme " << attackOrderArray[i]->getProt() << endl;
                 }
 
                 else if(attackOrderArray[i]->getName()=="Bone Defender #1"||attackOrderArray[i]->getName() == "Bone Defender #2"){
@@ -823,7 +835,7 @@ int main() {
                     int numOfSkill = rand() % 3 + 1;
                     int target = rand() % 2 + 1;
                     int healMonster = rand() % 4 + 1;
-                    int randHealAmount = rand() % 1 + 3;
+
                     if(numOfSkill==1){
                         cout<<attackOrderArray[i]->getName()<<" is selected AxeBlade to attack to "<<heroes[4-target]->getName()<<endl;
 
@@ -839,7 +851,11 @@ int main() {
                         cout<<heroes[4-target]->getName()<<"(Hp : "<<heroes[4-target]->getHp()<<")"<<endl;
                     }
                     else if(numOfSkill==3){
-                        cout<<attackOrderArray[i]->getName()<<" is selected Knitting Bones to heal to "<<monsters[healMonster]->getName()<<" by " <<randHealAmount<<endl;
+                        cout<<attackOrderArray[i]->getName()<<" is selected Knitting Bones to heal to "<<monsters[target-1]->getName()<<endl;
+
+                        cout << monsters[target-1]->getName() << "Earned Hp: " << endl;
+                        Skill_Knitting_Bones.utilityFunc(attackOrderArray[i],monsters[target-1]);
+                        cout<< monsters[target-1]->getName() << " " <<monsters[target-1]->getHp() <<endl;
                     }
                     cout<<"----------------------------------------"<<endl;
 
