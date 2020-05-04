@@ -828,6 +828,7 @@ int main() {
                         cout<<"Bulwark of Faith Selected!"<<endl;
                         Skill_Bulwark_Of_Faith.utilityFunc(attackOrderArray[i], attackOrderArray[i]);
                     }
+                    cout<<"----------------------------------------"<<endl;
                 }
 
                 else if(attackOrderArray[i]->getName()=="Bone Defender #1"||attackOrderArray[i]->getName() == "Bone Defender #2"){
