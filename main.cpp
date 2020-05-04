@@ -11,11 +11,12 @@ using namespace std;
 class Unit {
 protected:
     string name;
+    string type = "UNK";
     int position;
     int maxHp;
     int hp;
     int dodge;
-    int prot;
+    int prot = 0;
     int speed;
     int accMod;
     int baseCrit;
@@ -24,6 +25,7 @@ protected:
     int stunResist;
     bool alive = true;
     bool stun = false;
+    int protRound = 0;
 public:
     Unit(){}
 
@@ -32,6 +34,11 @@ public:
     string getName() {
         return name;
     }
+
+    string getType() {
+        return type;
+    }
+
     int getHp(){
         return hp;
     }
@@ -107,6 +114,14 @@ public:
         this->stun = stun;
     }
 
+    int getProtRound() {
+        return protRound;
+    }
+
+    void setProtRound(int protRound) {
+        this->protRound = protRound;
+    }
+
     void getDamage(int damage) {
         hp = hp - damage;
         if(hp <= 0 ) {
@@ -146,8 +161,10 @@ public:
 };
 class Crusader: public Hero {
 public:
+    int protRound = 0;
     Crusader(string na,int pst){
         name = na;
+        type = "crusader";
         position = pst;
         maxHp = 33;
         hp = 33;
@@ -179,10 +196,14 @@ public:
 
         }
     }
-    void virtual attack(){
-        // attack classi buradan cagirlacak
-
+    int getProtRound() {
+        return getProtRound();
     }
+
+    void setProtRound(int protRound) {
+        this->protRound = protRound;
+    }
+
 };
 class Vestal : public Hero{
 public:
@@ -485,14 +506,11 @@ public:
             if (prot) {
                 target->setProt(healer->getProt() + prot);
                 cout<<"Using Bulwark of Faith on "<< target->getName() <<", +20 protection for 3 round."<<endl;
-                protRound = 1;
+                protRound = 3;
             }
             else {
             }
         }
-    }
-    void add() {
-        protRound += 1;
     }
     // string effect gelecek +20 Prot for 3 round
 };
@@ -637,6 +655,16 @@ int main() {
         //
         cout<<endl;
 
+        for (int k = 0; k < 7; ++k) {
+            if(attackOrderArray[k]->getType() == "crusader" && attackOrderArray[k]->getProtRound() != 0) {
+                attackOrderArray[k]->setProtRound(attackOrderArray[k]->getProtRound()-1);
+            }
+            else{
+                attackOrderArray[k]->setProt(0);
+            }
+        }
+
+
         for(int i = 7;i>=0;i--){
             if(attackOrderArray[i]->isAlive() == true && attackOrderArray[i]->isStun() == false){
 
@@ -755,6 +783,9 @@ int main() {
                 }
 
                 else if(attackOrderArray[i]->getName() == "Crusader #1"||attackOrderArray[i]->getName() == "Crusader #2"){
+                    if(attackOrderArray[i]->getProtRound() == 0) {
+                        attackOrderArray[i]->setProt(0);
+                    }
                     if(attackOrderArray[i]->getPosition() == 1 || attackOrderArray[i]->getPosition() == 2){
                         cout<<"1 : Smite (Attack)"<<endl;
                         cout<<"2 : Stunning Blow (Attack)"<<endl;
@@ -827,6 +858,7 @@ int main() {
                     else if(numberOfSkill == 3){
                         cout<<"Bulwark of Faith Selected!"<<endl;
                         Skill_Bulwark_Of_Faith.utilityFunc(attackOrderArray[i], attackOrderArray[i]);
+                        attackOrderArray[i]->setProtRound(3);
                     }
                     cout<<"----------------------------------------"<<endl;
                 }
@@ -835,7 +867,7 @@ int main() {
 
                     int numOfSkill = rand() % 3 + 1;
                     int target = rand() % 2 + 1;
-                    int healMonster = rand() % 4 + 1;
+
 
                     if(numOfSkill==1){
                         cout<<attackOrderArray[i]->getName()<<" is selected AxeBlade to attack to "<<heroes[4-target]->getName()<<endl;
