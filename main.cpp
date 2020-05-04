@@ -13,7 +13,7 @@ protected:
     string name;
     string type = "UNK";
     int position;
-    int maxHp;
+    int maxHp = 0;
     int hp;
     int dodge;
     int prot = 0;
@@ -95,6 +95,10 @@ public:
 
     void setPosition(int pst){
         position = pst;
+    }
+
+    void getMaxHp(int maxHp){
+        this->maxHp = maxHp;
     }
 
     void setHp(int hpp){
@@ -512,6 +516,17 @@ public:
             }
         }
     }
+
+    void comfortFunc(shared_ptr<Unit> healer, shared_ptr<Unit> target) {
+        if (target->isAlive() == true) {
+            if (maxHp) {
+                double randomNumber = rand() % (maxHp - minHp) + minHp;
+                cout << randomNumber;
+            }
+        }
+
+
+    }
     // string effect gelecek +20 Prot for 3 round
 };
 
@@ -771,14 +786,20 @@ int main() {
 
                     }
                     else if(numberOfSkill == 4){
-                        //int healAmount = rand() % 3 + 1;
+
+
                         cout<<"Divine Comfort Selected!"<<endl;
                         cout<<"All units Healed " <<endl;
+                        heroes[1]->getHp();
+
+                        double randomNumber = rand() % (3 - 1) + 1;
+                        for (int j = 0; j <= 3 ; ++j) {
+                            if (heroes[j]->isAlive() == true){
+                                heroes[j]->increaseHp(randomNumber);
+                            }
+                        }
                     }
-                    for (int j = 0; j < 7; ++j) {
-                        Skill_Divine_Comfort.utilityFunc(attackOrderArray[i],attackOrderArray[j]);
-                        cout << "All units healed. " << endl;
-                    }
+
                     cout<<"----------------------------------------"<<endl;
                 }
 
