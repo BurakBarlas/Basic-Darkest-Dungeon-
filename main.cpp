@@ -18,6 +18,7 @@ protected:
     int dodge;
     int prot = 0;
     int speed;
+    int temporalSpeed;
     int accMod;
     int baseCrit;
     int minDmg;
@@ -51,6 +52,11 @@ public:
     int getSpeed() {
         return speed;
     }
+
+    int getTemporalSpeed() {
+        return temporalSpeed;
+    }
+
     int getAccMod() {
         return accMod;
     }
@@ -72,7 +78,7 @@ public:
     }
 
     void increaseSpeed(int speedIncrement) {
-        speed = speed + speedIncrement;
+        temporalSpeed = temporalSpeed + speedIncrement;
     }
 
     void increaseHp(int hpIncrement) {
@@ -91,6 +97,10 @@ public:
     }
     void setSpeed(int sped){
         speed = sped;
+    }
+
+    void setTemporalSpeed(int temporalSpeed) {
+        this->temporalSpeed = temporalSpeed;
     }
 
     void setPosition(int pst){
@@ -165,7 +175,6 @@ public:
 };
 class Crusader: public Hero {
 public:
-    int protRound = 0;
     Crusader(string na,int pst){
         name = na;
         type = "crusader";
@@ -175,6 +184,7 @@ public:
         dodge = 5;
         prot = 0;
         speed = 1;
+        temporalSpeed = 1;
         accMod = 0;
         baseCrit = 3;
         minDmg = 6;
@@ -200,13 +210,7 @@ public:
 
         }
     }
-    int getProtRound() {
-        return getProtRound();
-    }
 
-    void setProtRound(int protRound) {
-        this->protRound = protRound;
-    }
 
 };
 class Vestal : public Hero{
@@ -219,6 +223,7 @@ public:
         dodge = 0;
         prot = 0;
         speed = 4;
+        temporalSpeed = 4;
         accMod = 0;
         baseCrit = 1;
         minDmg = 4;
@@ -266,6 +271,7 @@ public:
         dodge = 10;
         prot = 15;
         speed = 2;
+        temporalSpeed = 2;
         accMod = 0;
         baseCrit = 0;
         minDmg = 3;
@@ -295,6 +301,7 @@ public:
         dodge = 8;
         prot = 45;
         speed = 1;
+        temporalSpeed = 1;
         accMod = 0;
         baseCrit = 0;
         minDmg = 2;
@@ -363,7 +370,7 @@ public:
                 int stunChange = 20 + stunBase - defender->getStunResist();
                 randomNumber = rand() % 101;
 
-                if(randomNumber <= stunChange) {
+                if(randomNumber <= stunChange && stunEffect == 1) {
                     defender->setStun(true);
                 }
                 else{
@@ -382,7 +389,7 @@ public:
                 int stunChange = stunBase - defender->getStunResist();
                 randomNumber = rand() % 101;
 
-                if(randomNumber <= stunChange) {
+                if(randomNumber <= stunChange && stunEffect == 1) {
                     defender->setStun(true);
                 }
                 else{
@@ -498,7 +505,7 @@ protected:
     int minHp = 0;
     int maxHp = 0;
     int prot = 0;
-    int protRound = 0;
+
 public:
     void utilityFunc(shared_ptr<Unit> healer,shared_ptr<Unit> target) {
         if (target->isAlive() == true) {
@@ -510,23 +517,13 @@ public:
             if (prot) {
                 target->setProt(healer->getProt() + prot);
                 cout<<"Using Bulwark of Faith on "<< target->getName() <<", +20 protection for 3 round."<<endl;
-                protRound = 3;
+                target->setProtRound(3);
             }
             else {
             }
         }
     }
 
-    void comfortFunc(shared_ptr<Unit> healer, shared_ptr<Unit> target) {
-        if (target->isAlive() == true) {
-            if (maxHp) {
-                double randomNumber = rand() % (maxHp - minHp) + minHp;
-                cout << randomNumber;
-            }
-        }
-
-
-    }
     // string effect gelecek +20 Prot for 3 round
 };
 
@@ -635,26 +632,7 @@ int main() {
     attackOrderArray[7] = ptrSecondBoneD;
 
 
-    int randSpeed;
-    shared_ptr<Unit>temp;
-    // Increase speeds with random number
-    for(int i=0;i<8;i++) {
-        randSpeed = rand() % 8 + 1;
-        attackOrderArray[i]->increaseSpeed(randSpeed);
-        // cout << i << ": " << attackOrderArray[i]->getName() << " " <<attackOrderArray[i]->getSpeed() << " " << endl;
-    }
 
-    for(int i=0;i<7;i++) {
-        for (int j = 0; j < 7; j++) {
-            if (attackOrderArray[j]->getSpeed() >
-                attackOrderArray[j + 1]->getSpeed()) {
-
-                temp = attackOrderArray[j];
-                attackOrderArray[j] = attackOrderArray[j+1];
-                attackOrderArray[j+1] = temp;
-            }
-        }
-    }
     // Test
 //    for(int i=0;i<8;i++) {
 //        //cout << i << ": " << attackOrderArray[i]->getName() << " " <<attackOrderArray[i]->getHp() << endl;
@@ -670,11 +648,37 @@ int main() {
         //
         cout<<endl;
 
+        int randSpeed;
+        shared_ptr<Unit>temp;
+        // Increase speeds with random number
+        for(int i=0;i<8;i++) {
+            randSpeed = rand() % 8 + 1;
+            attackOrderArray[i]->increaseSpeed(randSpeed);
+            // cout << i << ": " << attackOrderArray[i]->getName() << " " <<attackOrderArray[i]->getSpeed() << " " << endl;
+        }
+
+        for(int i=0;i<7;i++) {
+            for (int j = 0; j < 7; j++) {
+
+                if (attackOrderArray[j]->getTemporalSpeed() >
+                    attackOrderArray[j + 1]->getTemporalSpeed()) {
+
+                    temp = attackOrderArray[j];
+                    attackOrderArray[j] = attackOrderArray[j+1];
+                    attackOrderArray[j+1] = temp;
+
+                }
+            }
+        }
+        for (int l = 0; l < 8; ++l) {
+            attackOrderArray[l]->setTemporalSpeed(attackOrderArray[l]->getSpeed());
+        }
+
         for (int k = 0; k < 7; ++k) {
             if(attackOrderArray[k]->getType() == "crusader" && attackOrderArray[k]->getProtRound() != 0) {
                 attackOrderArray[k]->setProtRound(attackOrderArray[k]->getProtRound()-1);
             }
-            else{
+            else if(attackOrderArray[k]->getType() == "crusader") {
                 attackOrderArray[k]->setProt(0);
             }
         }
