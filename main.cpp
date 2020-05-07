@@ -5,14 +5,14 @@
 #include <time.h>
 #include <stdio.h>
 #include <memory>
-
+#include <algorithm>
 using namespace std;
 
 class Unit {
 protected:
     string name;
     string type = "UNK";
-    int position;
+    //int position;
     int maxHp = 0;
     int hp;
     int dodge;
@@ -28,6 +28,7 @@ protected:
     bool stun = false;
     int protRound = 0;
 public:
+    int position;
     Unit(){}
 
     void virtual dying() {}
@@ -35,11 +36,9 @@ public:
     string getName() {
         return name;
     }
-
     string getType() {
         return type;
     }
-
     int getHp(){
         return hp;
     }
@@ -52,11 +51,9 @@ public:
     int getSpeed() {
         return speed;
     }
-
     int getTemporalSpeed() {
         return temporalSpeed;
     }
-
     int getAccMod() {
         return accMod;
     }
@@ -72,7 +69,6 @@ public:
     int getStunResist() {
         return stunResist;
     }
-
     int getPosition() {
         return position;
     }
@@ -188,31 +184,14 @@ public:
         accMod = 0;
         baseCrit = 3;
         minDmg = 6;
-        maxDmg = 12;
-        //maxDmg = 1000; //deneme
+        //maxDmg = 12;
+        maxDmg = 1000; //deneme
         deathBlowResist=67;
         stunResist = 40;
     }
-    void useSkill(int choice){
-        if(choice == 1){
-            //Smite
-        }
-        else if(choice == 2){
-            //stunning blow
-        }
-        else if(choice == 3){
-            //hooly lance
-        }
-        else if(choice == 4){
-            //bulwark of faith
-        }
-        else{
-
-        }
-    }
-
 
 };
+
 class Vestal : public Hero{
 public:
     Vestal(string na,int pst):Hero(){
@@ -227,30 +206,11 @@ public:
         accMod = 0;
         baseCrit = 1;
         minDmg = 4;
-        maxDmg = 8;
-        //maxDmg = 1000; // deneme
+        //maxDmg = 8;
+        maxDmg = 1000; // deneme
         deathBlowResist = 77;
         stunResist = 30;
     }
-    void useSkill(int choice){
-        if(choice == 1){
-            //Mace Bash
-        }
-        else if(choice == 2){
-            //Dazzling Light
-        }
-        else if(choice == 3){
-            //Divine Grace
-        }
-        else if(choice == 4){
-            //Divine comfort
-        }
-        else{
-
-        }
-    }
-
-
 };
 
 class Monster: public Unit {
@@ -278,19 +238,9 @@ public:
         maxDmg = 8;
         stunResist = 25;
     }
-    void useSkill(int choice){
-        if(choice == 1){
-            //graveyard slash
-        }
-        else if(choice == 2){
-            //graveyard stumble
-        }
-        else{
-
-        }
-    }
 
 };
+
 class Bone_Defender:public Monster{
 public:
     Bone_Defender(string na,int pst):Monster(){
@@ -308,23 +258,7 @@ public:
         maxDmg = 4;
         stunResist = 45;
     }
-    void useSkill(int choice){
-        if(choice == 1){
-            //Axeblade
-        }
-        else if(choice == 2){
-            //Dead weight
-        }
-        else if(choice == 3){
-            //Knitting Bones
-        }
-        else{
-
-        }
-    }
 };
-
-
 
 
 class StunSkill{
@@ -340,9 +274,17 @@ public:
 
 };
 class MoveSkill: public Skill{
+public:
+    MoveSkill(){}
+
+    void Move_Skill_Forward1(const shared_ptr<Unit>& Forward1){
+        Forward1->setPosition((Forward1->getPosition())-1);
+    }
+    void Move_Skill_Backward1(const shared_ptr<Unit>& Backward1){
+        Backward1->setPosition((Backward1->getPosition())+1);
+    }
 
 };
-
 class AttackSkill: public Skill{
 protected:
     int dmgMod;
@@ -358,11 +300,11 @@ public:
         int randomNumber = rand() % 101;
         int hitChange = baseAcc + attacker->getAccMod() - defender->getDodge();
 
-        if (hitChange >= randomNumber) { // saldirirma hesaplamasi
-            double criticalChance = attacker->getBaseCrit() + critMod; //
+        if (hitChange >= randomNumber) { // saldirir ve crit hesaplamasi yapilir
+            double criticalChance = attacker->getBaseCrit() + critMod;
             randomNumber = rand() % 101;
 
-            if (criticalChance >= randomNumber) { // crit hesaplamasi
+            if (criticalChance >= randomNumber) { // crit vurur
                 double critHit = attacker->getMaxDmg() * 1.5;
                 cout<<attacker->getName()<<", CRIT damage : "<<critHit<<endl;
                 defender->getDamage(critHit);
@@ -414,6 +356,7 @@ public:
     }
 
 };
+
 class Smite: public AttackSkill{
 public:
     Smite(){
@@ -511,7 +454,7 @@ public:
         if (target->isAlive() == true) {
             if (maxHp) {
                 double randomNumber = rand() % (maxHp - minHp) + minHp;
-                cout << randomNumber << endl;
+                cout << randomNumber;
                 target->increaseHp(randomNumber);
             }
             if (prot) {
@@ -564,9 +507,13 @@ public:
     }
 };
 
+bool comparatorHero(const shared_ptr<Hero>& lhs, const shared_ptr<Hero>& rhs){
+    return lhs->position < rhs->position;
+}
 
-
-
+bool comparatorMonster(const shared_ptr<Monster>& lhs, const shared_ptr<Monster>& rhs){
+    return lhs->position < rhs->position;
+}
 
 int main() {
     srand (time(0));
@@ -597,7 +544,9 @@ int main() {
     Axeblade Skill_Axeblade;//Attack
     Dead_Weight Skill_Dead_Weight;//Attack
     Knitting_Bones Skill_Knitting_Bones;//Utility (Heal)
-
+    //Move Skills
+    MoveSkill Move_Forward1;
+    MoveSkill Move_Backward1;
 
     //Unit attackOrderArray[8];
     //shared_ptr<Unit[]> attackOrderArray = make_shared<Unit[]>(8);
@@ -683,286 +632,676 @@ int main() {
             }
         }
 
+        for(int i = 0; i < 8; i++){
+            attackOrderArray[i]->setPosition(attackOrderArray[i]->getPosition());
+        }
 
-        for(int i = 7;i>=0;i--){
-            if(attackOrderArray[i]->isAlive() == true && attackOrderArray[i]->isStun() == false){
+        for(int i = 7;i>=0;i--) {
+            if (attackOrderArray[i]->isAlive() == true && attackOrderArray[i]->isStun() == false) {
 
-                cout<<attackOrderArray[i]->getName()<<"'s turn! "<<"Select a skill!"<<endl;
+                cout << attackOrderArray[i]->getName() << "'s turn! " << "Select a skill!" << endl;
                 /*for(int j = 0;j<8;j++){
                     cout<<attackOrderArray[j].getName()<<" ";
                     cout<<attackOrderArray[j].getSpeed()+randSpeeds[j]<<endl;
-
                 }*//*Test için duruyor*/
-                if(attackOrderArray[i]->getName() == "Vestal #1" || attackOrderArray[i]->getName() == "Vestal #2"){
-                    if(attackOrderArray[i]->getPosition() == 1){
+                if (attackOrderArray[i]->getName() == "Vestal #1" || attackOrderArray[i]->getName() == "Vestal #2") {
+                    if (attackOrderArray[i]->getPosition() == 1) {
                         int target;
-                        cout<<"1 : Mace Bash (Attack)"<<endl;
-                        cout<<attackOrderArray[i]->getName()<<" at Position 1"<<endl;
-                        cout<<"Mace Bash Selected automatically!"<<endl;
-                        cout<<"Select a target to attack!"<<endl;
-                        cout<<"1-"<<monsters[0]->getName()<<"("<<monsters[0]->getHp()<<")"<<endl;
-                        cout<<"2-"<<monsters[1]->getName()<<"("<<monsters[1]->getHp()<<")"<<endl;
-                        cout<<"Number of Target : ";
-                        cin>>target;
-                        cout<<"Using Mace Bash to attack to "<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
-                        Skill_Mace_Bash.attackFunc(attackOrderArray[i],monsters[target-1]);
-                        cout<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
-
-                    }
-                    else if(attackOrderArray[i]->getPosition() == 2){
-                        cout<<"1 : Mace Bash (Attack)"<<endl;
-                        cout<<"2 : Dazzling Light (Attack)"<<endl;
-                        cout<<"4 : Divine Comfort (Utility)"<<endl;
-                        cout<<"Number of Skill : ";
-                        cin>>numberOfSkill;
-                        if(numberOfSkill==3){
-                            cout<<"Number of Skill selected 4 automatically because your selection is not an option! "<<endl;
-                            numberOfSkill = 4;
-
+                        cout << "1 : Mace Bash (Attack)" << endl;
+                        cout << "2 : Move Backward 1 (Move)" << endl;
+                        cout << "Number of Skill : ";
+                        cin >> numberOfSkill;
+                        if (numberOfSkill == 1) {
+                            cout << "Mace Bash Selected!" << endl;
+                            cout << "Select a target to attack!" << endl;
+                            cout << "1-" << monsters[0]->getName() << "(" << monsters[0]->getHp() << ")" << endl;
+                            cout << "2-" << monsters[1]->getName() << "(" << monsters[1]->getHp() << ")" << endl;
+                            cout << "Number of Target : ";
+                            cin >> target;
+                            cout << "Using Mace Bash to attack to " << monsters[target - 1]->getName() << "(Hp : "
+                                 << monsters[target - 1]->getHp() << ")" << endl;
+                            Skill_Mace_Bash.attackFunc(attackOrderArray[i], monsters[target - 1]);
+                            cout << monsters[target - 1]->getName() << "(Hp : " << monsters[target - 1]->getHp() << ")"
+                                 << endl;
                         }
+                        else if (numberOfSkill == 2) {
+                            for (int j = 0; j <= 3; j++) {
+                                if (attackOrderArray[i]->getPosition() == heroes[j]->getPosition()) {
+                                    Move_Backward1.Move_Skill_Backward1(heroes[j]);
+                                    Move_Forward1.Move_Skill_Forward1(heroes[j + 1]);
 
-                    }
-                    else if(attackOrderArray[i]->getPosition() == 3 || attackOrderArray[i]->getPosition() == 4){
-                        cout<<"2 : Dazzling Light (Attack)"<<endl;
-                        cout<<"3 : Divine Grace (Utility)"<<endl;
-                        cout<<"4 : Divine Comfort (Utility)"<<endl;
-                        cout<<"Number of Skill : ";
-                        cin>>numberOfSkill;
-                        if(numberOfSkill==1){
-                            cout<<"Number of Skill selected 2 automatically because your selection is not an option! "<<endl;
-                            numberOfSkill = 2;
+                                    cout << heroes[j]->getName() << " moves 1 step backward!" << endl;
+                                    cout << heroes[j + 1]->getName() << " moves 1 step forward!" << endl;
 
-                        }
-
-                    }
-
-                    if(numberOfSkill == 1){
-                        int target;
-                        cout<<"Mace Bash Selected!"<<endl;
-                        cout<<"Select a target to attack!"<<endl;
-                        cout<<"1-"<<monsters[0]->getName()<<"(Hp : "<<monsters[0]->getHp()<<")"<<endl;
-                        cout<<"2-"<<monsters[1]->getName()<<"(Hp : "<<monsters[1]->getHp()<<")"<<endl;
-                        cout<<"Number of Target : ";
-                        cin>>target;
-                        if(target==3||target==4){
-                            cout<<"Number of Target selected 1 automatically because your selection is not an option! "<<endl;
-                            target = 1;
-
-                        }
-                        cout<<"Using Mace Bash to attack to "<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
-                        //monsters[target-1].setHp(Skill_Mace_Bash.attackFunc(&attackOrderArray[i],&monsters[target-1]));
-                        Skill_Mace_Bash.attackFunc(attackOrderArray[i],monsters[target-1]);
-                        cout<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
-                    }
-                    else if(numberOfSkill == 2){
-                        int target;
-                        cout<<"Dazzling Light Selected!"<<endl;
-                        cout<<"Select a target to attack!"<<endl;
-                        cout<<"1-"<<monsters[0]->getName()<<"(Hp : "<<monsters[0]->getHp()<<")"<<endl;
-                        cout<<"2-"<<monsters[1]->getName()<<"(Hp : "<<monsters[1]->getHp()<<")"<<endl;
-                        cout<<"3-"<<monsters[2]->getName()<<"(Hp : "<<monsters[2]->getHp()<<")"<<endl;
-                        cout<<"Number of Target : ";
-                        cin>>target;
-                        if(target==4){
-                            cout<<"Number of Target selected 1 automatically because your selection is not an option! "<<endl;
-                            target = 1;
-
-                        }
-                        cout<<"Using Dazzling Light to attack to "<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
-                        Skill_Dazzling_Light.attackFunc(attackOrderArray[i],monsters[target-1]);
-                        cout<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
-                    }
-                    else if(numberOfSkill == 3){
-                        int target;
-                        cout<<"Divine Grace Selected!"<<endl;
-                        cout<<"Select a target to heal!"<<endl;
-                        cout<<"1-"<<heroes[0]->getName()<<"(Hp : "<<heroes[0]->getHp()<<")"<<endl;
-                        cout<<"2-"<<heroes[1]->getName()<<"(Hp : "<<heroes[1]->getHp()<<")"<<endl;
-                        cout<<"3-"<<heroes[2]->getName()<<"(Hp : "<<heroes[2]->getHp()<<")"<<endl;
-                        cout<<"4-"<<heroes[3]->getName()<<"(Hp : "<<heroes[3]->getHp()<<")"<<endl;
-                        cout<<"Number of Target : ";
-                        cin>>target;
-
-                        cout << heroes[target-1]->getName() << "(Hp : " <<heroes[target-1]->getHp()<< ")" << " Earned Hp: ";
-                        Skill_Divine_Grace.utilityFunc(attackOrderArray[i],heroes[target-1]);
-                        cout<< heroes[target-1]->getName() << "(Hp : " <<heroes[target-1]->getHp()<< ")" <<endl;
-
-                    }
-                    else if(numberOfSkill == 4){
-
-
-                        cout<<"Divine Comfort Selected!"<<endl;
-                        cout<<"All units Healed " <<endl;
-                        heroes[1]->getHp();
-
-                        double randomNumber = rand() % (3 - 1) + 1;
-                        for (int j = 0; j <= 3 ; ++j) {
-                            if (heroes[j]->isAlive() == true){
-                                heroes[j]->increaseHp(randomNumber);
+                                    sort(heroes.begin(), heroes.end(), &comparatorHero);
+                                }
                             }
                         }
                     }
+                    else if (attackOrderArray[i]->getPosition() == 2) {
+                        cout << "1 : Mace Bash (Attack)" << endl;
+                        cout << "2 : Dazzling Light (Attack)" << endl;
+                        cout << "4 : Divine Comfort (Utility)" << endl;
+                        cout << "5 : Move 1 step Forward (Move)" << endl;
+                        cout << "6 : Move 1 step Backward (Move)" << endl;
+                        cout << "Number of Skill : ";
 
-                    cout<<"----------------------------------------"<<endl;
-                }
+                        cin >> numberOfSkill;
+                        if (numberOfSkill == 3) {
+                            cout << "Number of Skill selected 4 automatically because your selection is not an option! "
+                                 << endl;
+                            numberOfSkill = 4;
+                        }
 
-                else if(attackOrderArray[i]->getName() == "Crusader #1"||attackOrderArray[i]->getName() == "Crusader #2"){
-                    if(attackOrderArray[i]->getProtRound() == 0) {
-                        attackOrderArray[i]->setProt(0);
-                    }
-                    if(attackOrderArray[i]->getPosition() == 1 || attackOrderArray[i]->getPosition() == 2){
-                        cout<<"1 : Smite (Attack)"<<endl;
-                        cout<<"2 : Stunning Blow (Attack)"<<endl;
-                        cout<<"3 : Bulwark of Faith (Utility)"<<endl;
-                        cout<<"Number of Skill : ";
-                        cin>>numberOfSkill;
-                        if(numberOfSkill==4){
-                            cout<<"Number of Skill selected 1 automatically because your selection is not an option! "<<endl;
-                            numberOfSkill = 1;
+                    } else if (attackOrderArray[i]->getPosition() == 3) {
+                        cout << "2 : Dazzling Light (Attack)" << endl;
+                        cout << "3 : Divine Grace (Utility)" << endl;
+                        cout << "4 : Divine Comfort (Utility)" << endl;
+                        cout << "5 : Move 1 step Forward (Move)" << endl;
+                        cout << "6 : Move 1 step Backward (Move)" << endl;
 
+                        cout << "Number of Skill : ";
+                        cin >> numberOfSkill;
+                        if (numberOfSkill == 1) {
+                            cout << "Number of Skill selected 2 automatically because your selection is not an option! "
+                                 << endl;
+                            numberOfSkill = 2;
+                        }
+                    } else if (attackOrderArray[i]->getPosition() == 4) {
+                        cout << "2 : Dazzling Light (Attack)" << endl;
+                        cout << "3 : Divine Grace (Utility)" << endl;
+                        cout << "4 : Divine Comfort (Utility)" << endl;
+                        cout << "5 : Move 1 step Forward (Move)" << endl;
+
+                        cout << "Number of Skill : ";
+                        cin >> numberOfSkill;
+                        if (numberOfSkill == 1) {
+                            cout << "Number of Skill selected 2 automatically because your selection is not an option! "
+                                 << endl;
+                            numberOfSkill = 2;
                         }
                     }
-                    else{
+                    //Skills
+                    if (numberOfSkill == 1) {
                         int target;
-                        cout<<"4 : Holy Lance (Attack)"<<endl;
-                        cout<<"Holy Lance selected automatically!"<<endl;
-                        cout<<"Select a target to attack!"<<endl;
-                        cout<<"2-"<<monsters[1]->getName()<<"(Hp : "<<monsters[1]->getHp()<<")"<<endl;
-                        cout<<"3-"<<monsters[2]->getName()<<"(Hp : "<<monsters[2]->getHp()<<")"<<endl;
-                        cout<<"4-"<<monsters[3]->getName()<<"(Hp : "<<monsters[3]->getHp()<<")"<<endl;
-                        cout<<"Number of Target : ";
-                        cin>>target;
-                        if(target==1){
-                            cout<<"Number of Target selected 2 automatically because your selection is not an option! "<<endl;
+                        cout << "Mace Bash Selected!" << endl;
+                        cout << "Select a target to attack!" << endl;
+                        cout << "1-" << monsters[0]->getName() << "(Hp : " << monsters[0]->getHp() << ")" << endl;
+                        cout << "2-" << monsters[1]->getName() << "(Hp : " << monsters[1]->getHp() << ")" << endl;
+                        cout << "Number of Target : ";
+                        cin >> target;
+                        if (target == 3 || target == 4) {
+                            cout
+                                    << "Number of Target selected 1 automatically because your selection is not an option! "
+                                    << endl;
+                            target = 1;
+
+                        }
+                        cout << "Using Mace Bash to attack to " << monsters[target - 1]->getName() << "(Hp : "
+                             << monsters[target - 1]->getHp() << ")" << endl;
+                        //monsters[target-1].setHp(Skill_Mace_Bash.attackFunc(&attackOrderArray[i],&monsters[target-1]));
+                        Skill_Mace_Bash.attackFunc(attackOrderArray[i], monsters[target - 1]);
+                        cout << monsters[target - 1]->getName() << "(Hp : " << monsters[target - 1]->getHp() << ")"
+                             << endl;
+                    }
+                    else if (numberOfSkill == 2) {
+                        int target;
+                        cout << "Dazzling Light Selected!" << endl;
+                        cout << "Select a target to attack!" << endl;
+                        cout << "1-" << monsters[0]->getName() << "(Hp : " << monsters[0]->getHp() << ")" << endl;
+                        cout << "2-" << monsters[1]->getName() << "(Hp : " << monsters[1]->getHp() << ")" << endl;
+                        cout << "3-" << monsters[2]->getName() << "(Hp : " << monsters[2]->getHp() << ")" << endl;
+                        cout << "Number of Target : ";
+                        cin >> target;
+                        if (target == 4) {
+                            cout
+                                    << "Number of Target selected 1 automatically because your selection is not an option! "
+                                    << endl;
+                            target = 1;
+
+                        }
+                        cout << "Using Dazzling Light to attack to " << monsters[target - 1]->getName() << "(Hp : "
+                             << monsters[target - 1]->getHp() << ")" << endl;
+                        //monsters[target-1].setHp(Skill_Dazzling_Light.attackFunc(&attackOrderArray[i],&monsters[target-1]));
+                        Skill_Dazzling_Light.attackFunc(attackOrderArray[i], monsters[target - 1]);
+                        cout << monsters[target - 1]->getName() << "(Hp : " << monsters[target - 1]->getHp() << ")"
+                             << endl;
+                    }
+                    else if (numberOfSkill == 3) {
+                        int target;
+                        cout << "Divine Grace Selected!" << endl;
+                        cout << "Select a target to heal!" << endl;
+                        cout << "1-" << heroes[0]->getName() << "(Hp : " << heroes[0]->getHp() << ")" << endl;
+                        cout << "2-" << heroes[1]->getName() << "(Hp : " << heroes[1]->getHp() << ")" << endl;
+                        cout << "3-" << heroes[2]->getName() << "(Hp : " << heroes[2]->getHp() << ")" << endl;
+                        cout << "4-" << heroes[3]->getName() << "(Hp : " << heroes[3]->getHp() << ")" << endl;
+                        cout << "Number of Target : ";
+                        cin >> target;
+
+                        cout << heroes[target - 1]->getName() << "Earned Hp: " << endl;
+                        Skill_Divine_Grace.utilityFunc(attackOrderArray[i], heroes[target - 1]);
+                        cout << heroes[target - 1]->getName() << " " << heroes[target - 1]->getHp() << endl;
+
+                    }
+                    else if (numberOfSkill == 4) {
+
+
+                        cout << "Divine Comfort Selected!" << endl;
+                        cout << "All units Healed " << endl;
+                        heroes[1]->getHp();
+
+                        double randomNumber = rand() % (3 - 1) + 1;
+                        for (int j = 0; j <= 3; ++j) {
+                            if (heroes[j]->isAlive() == true) {
+                                heroes[j]->increaseHp(randomNumber);
+                            }
+                        }
+                    } else if (numberOfSkill == 5) {
+                        for (int j = 0; j <= 3; j++) {
+                            if (attackOrderArray[i]->getPosition() == heroes[j]->getPosition()) {
+                                Move_Forward1.Move_Skill_Forward1(heroes[j]);
+                                Move_Backward1.Move_Skill_Backward1(heroes[j - 1]);
+
+
+                                cout << heroes[j]->getName() << " moves 1 step forward!" << endl;
+                                cout << heroes[j - 1]->getName() << " moves 1 step backward!" << endl;
+
+                            }
+                        }
+                        sort(heroes.begin(), heroes.end(), &comparatorHero);
+                    } else if (numberOfSkill == 6) {
+                        for (int j = 0; j <= 3; j++) {
+                            if (attackOrderArray[i]->getPosition() == heroes[j]->getPosition()) {
+                                Move_Backward1.Move_Skill_Backward1(heroes[j]);
+                                Move_Forward1.Move_Skill_Forward1(heroes[j + 1]);
+
+                                cout << heroes[j]->getName() << " moves 1 step backward!" << endl;
+                                cout << heroes[j + 1]->getName() << " moves 1 step forward!" << endl;
+                            }
+                        }
+                        sort(heroes.begin(), heroes.end(), &comparatorHero);
+                    }
+
+                    for (int i = 0; i < 8; i++) {
+                        attackOrderArray[i]->setPosition(attackOrderArray[i]->getPosition());
+                    }
+                    //Test
+                    for (int i = 0; i < 4; i++) {
+                        cout << heroes[i]->getName() << "Position = " << heroes[i]->getPosition() << endl;
+                    }
+                    cout << "----------------------------------------" << endl;
+                } else if (attackOrderArray[i]->getName() == "Crusader #1" ||
+                           attackOrderArray[i]->getName() == "Crusader #2") {
+                    if (attackOrderArray[i]->getProtRound() == 0) {
+                        attackOrderArray[i]->setProt(0);
+                    }
+                    if (attackOrderArray[i]->getPosition() == 1) {
+                        cout << "1 : Smite (Attack)" << endl;
+                        cout << "2 : Stunning Blow (Attack)" << endl;
+                        cout << "3 : Bulwark of Faith (Utility)" << endl;
+                        cout << "6 : Move 1 step Backward (Move)" << endl;
+
+                        cout << "Number of Skill : ";
+                        cin >> numberOfSkill;
+                        if (numberOfSkill == 4) {
+                            cout << "Number of Skill selected 1 automatically because your selection is not an option! "
+                                 << endl;
+                            numberOfSkill = 1;
+                        }
+                    } else if (attackOrderArray[i]->getPosition() == 2) {
+                        cout << "1 : Smite (Attack)" << endl;
+                        cout << "2 : Stunning Blow (Attack)" << endl;
+                        cout << "3 : Bulwark of Faith (Utility)" << endl;
+                        cout << "5 : Move 1 step Forward (Move)" << endl;
+                        cout << "6 : Move 1 step Backward (Move)" << endl;
+
+                        cout << "Number of Skill : ";
+                        cin >> numberOfSkill;
+                        if (numberOfSkill == 4) {
+                            cout << "Number of Skill selected 1 automatically because your selection is not an option! "
+                                 << endl;
+                            numberOfSkill = 1;
+                        }
+                    } else if (attackOrderArray[i]->getPosition() == 3) {
+                        cout << "4 : Holy Lance (Attack)" << endl;
+                        cout << "5 : Move 1 step Forward (Move)" << endl;
+                        cout << "6 : Move 1 step Backward (Move)" << endl;
+
+                        cout << "Number of Skill : ";
+                        cin >> numberOfSkill;
+                    } else if (attackOrderArray[i]->getPosition() == 4) {
+                        cout << "4 : Holy Lance (Attack)" << endl;
+                        cout << "5 : Move 1 step Forward (Move)" << endl;
+
+                        cout << "Number of Skill : ";
+                        cin >> numberOfSkill;
+                        if (numberOfSkill == 6) {
+                            cout << "Number of Skill selected 1 automatically because your selection is not an option! "
+                                 << endl;
+                            numberOfSkill = 5;
+                        }
+                    }
+                    //Skills
+                    if (numberOfSkill == 1) {
+                        int target;
+                        cout << "Smite Selected!" << endl;
+                        cout << "Select a target to attack!" << endl;
+                        cout << "1-" << monsters[0]->getName() << "(Hp : " << monsters[0]->getHp() << ")" << endl;
+                        cout << "2-" << monsters[1]->getName() << "(Hp : " << monsters[1]->getHp() << ")" << endl;
+                        cout << "Number of Target : ";
+                        cin >> target;
+                        if (target == 3 || target == 4) {
+                            cout
+                                    << "Number of Target selected 1 automatically because your selection is not an option! "
+                                    << endl;
+                            target = 1;
+
+                        }
+                        cout << "Using Smite on " << monsters[target - 1]->getName() << "(Hp : "
+                             << monsters[target - 1]->getHp() << ")" << endl;
+
+                        Skill_Smite.attackFunc(attackOrderArray[i], monsters[target - 1]);
+                        cout << monsters[target - 1]->getName() << "(Hp : " << monsters[target - 1]->getHp() << ")"
+                             << endl;
+                    } else if (numberOfSkill == 2) {
+                        int target;
+                        cout << "Stunning Blow Selected!" << endl;
+                        cout << "Select a target to attack!" << endl;
+                        cout << "1-" << monsters[0]->getName() << "(Hp : " << monsters[0]->getHp() << ")" << endl;
+                        cout << "2-" << monsters[1]->getName() << "(Hp : " << monsters[1]->getHp() << ")" << endl;
+                        cout << "Number of Target : ";
+                        cin >> target;
+                        if (target == 3 || target == 4) {
+                            cout
+                                    << "Number of Target selected 1 automatically because your selection is not an option! "
+                                    << endl;
+                            target = 1;
+
+                        }
+                        cout << "Using Stunning Blow on " << monsters[target - 1]->getName() << "(Hp : "
+                             << monsters[target - 1]->getHp() << ")" << endl;
+                        // monsters[target-1].setHp(Skill_Stunning_Blow.attackFunc(&attackOrderArray[i], &monsters[target-1]));
+                        Skill_Stunning_Blow.attackFunc(attackOrderArray[i], monsters[target - 1]);
+                        cout << monsters[target - 1]->getName() << "(Hp : " << monsters[target - 1]->getHp() << ")"
+                             << endl;
+                    } else if (numberOfSkill == 3) {
+                        cout << "Bulwark of Faith Selected!" << endl;
+                        Skill_Bulwark_Of_Faith.utilityFunc(attackOrderArray[i], attackOrderArray[i]);
+                        attackOrderArray[i]->setProtRound(3);
+                    } else if (numberOfSkill == 4) {
+                        int target;
+                        cout << "4 : Holy Lance (Attack)" << endl;
+                        cout << "Holy Lance selected automatically!" << endl;
+                        cout << "Select a target to attack!" << endl;
+                        cout << "2-" << monsters[1]->getName() << "(Hp : " << monsters[1]->getHp() << ")" << endl;
+                        cout << "3-" << monsters[2]->getName() << "(Hp : " << monsters[2]->getHp() << ")" << endl;
+                        cout << "4-" << monsters[3]->getName() << "(Hp : " << monsters[3]->getHp() << ")" << endl;
+                        cout << "Number of Target : ";
+                        cin >> target;
+                        if (target == 1) {
+                            cout
+                                    << "Number of Target selected 2 automatically because your selection is not an option! "
+                                    << endl;
                             target = 2;
 
                         }
-                        cout<<"Using Holy Lance to attack to "<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
+                        cout << "Using Holy Lance to attack to " << monsters[target - 1]->getName() << "(Hp : "
+                             << monsters[target - 1]->getHp() << ")" << endl;
                         //monsters[target-1].setHp(Skill_Holy_Lance.attackFunc(&attackOrderArray[i], &monsters[target-1]));
-                        Skill_Holy_Lance.attackFunc(attackOrderArray[i], monsters[target-1]);
-                        cout<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
-                    }
+                        Skill_Holy_Lance.attackFunc(attackOrderArray[i], monsters[target - 1]);
+                        cout << monsters[target - 1]->getName() << "(Hp : " << monsters[target - 1]->getHp() << ")"
+                             << endl;
 
-                    if(numberOfSkill == 1){
-                        int target;
-                        cout<<"Smite Selected!"<<endl;
-                        cout<<"Select a target to attack!"<<endl;
-                        cout<<"1-"<<monsters[0]->getName()<<"(Hp : "<<monsters[0]->getHp()<<")"<<endl;
-                        cout<<"2-"<<monsters[1]->getName()<<"(Hp : "<<monsters[1]->getHp()<<")"<<endl;
-                        cout<<"Number of Target : ";
-                        cin>>target;
-                        if(target==3||target==4){
-                            cout<<"Number of Target selected 1 automatically because your selection is not an option! "<<endl;
-                            target = 1;
+                        for (int j = 0; j <= 3; j++) {
+                            if (attackOrderArray[i]->getPosition() == heroes[j]->getPosition()) {
+                                Move_Forward1.Move_Skill_Forward1(heroes[j]);
+                                Move_Backward1.Move_Skill_Backward1(heroes[j - 1]);
 
+                                cout << heroes[j]->getName() << " moves 1 step forward!" << endl;
+                                cout << heroes[j - 1]->getName() << " moves 1 step backward!" << endl;
+
+                            }
                         }
-                        cout<<"Using Smite on "<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
+                        sort(heroes.begin(), heroes.end(), &comparatorHero);
+                    } else if (numberOfSkill == 5) {
+                        for (int j = 0; j <= 3; j++) {
+                            if (attackOrderArray[i]->getPosition() == heroes[j]->getPosition()) {
+                                Move_Forward1.Move_Skill_Forward1(heroes[j]);
+                                Move_Backward1.Move_Skill_Backward1(heroes[j - 1]);
 
-                        Skill_Smite.attackFunc(attackOrderArray[i], monsters[target-1]);
-                        cout<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
-                    }
-                    else if(numberOfSkill == 2){
-                        int target;
-                        cout<<"Stunning Blow Selected!"<<endl;
-                        cout<<"Select a target to attack!"<<endl;
-                        cout<<"1-"<<monsters[0]->getName()<<"(Hp : "<<monsters[0]->getHp()<<")"<<endl;
-                        cout<<"2-"<<monsters[1]->getName()<<"(Hp : "<<monsters[1]->getHp()<<")"<<endl;
-                        cout<<"Number of Target : ";
-                        cin>>target;
-                        if(target==3||target==4){
-                            cout<<"Number of Target selected 1 automatically because your selection is not an option! "<<endl;
-                            target = 1;
+                                cout << heroes[j]->getName() << " moves 1 step forward!" << endl;
+                                cout << heroes[j - 1]->getName() << " moves 1 step backward!" << endl;
 
+                            }
                         }
-                        cout<<"Using Stunning Blow on "<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
-                        // monsters[target-1].setHp(Skill_Stunning_Blow.attackFunc(&attackOrderArray[i], &monsters[target-1]));
-                        Skill_Stunning_Blow.attackFunc(attackOrderArray[i], monsters[target-1]);
-                        cout<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
+                        sort(heroes.begin(), heroes.end(), &comparatorHero);
+                    } else if (numberOfSkill == 6) {
+                        for (int j = 0; j <= 3; j++) {
+                            if (attackOrderArray[i]->getPosition() == heroes[j]->getPosition()) {
+                                Move_Backward1.Move_Skill_Backward1(heroes[j]);
+                                Move_Forward1.Move_Skill_Forward1(heroes[j + 1]);
+
+                                cout << heroes[j]->getName() << " moves 1 step backward!" << endl;
+                                cout << heroes[j + 1]->getName() << " moves 1 step forward!" << endl;
+
+                            }
+                        }
+                        sort(heroes.begin(), heroes.end(), &comparatorHero);
                     }
-                    else if(numberOfSkill == 3){
-                        cout<<"Bulwark of Faith Selected!"<<endl;
-                        Skill_Bulwark_Of_Faith.utilityFunc(attackOrderArray[i], attackOrderArray[i]);
-                        attackOrderArray[i]->setProtRound(3);
+
+                    for (int i = 0; i < 8; i++) {
+                        attackOrderArray[i]->setPosition(attackOrderArray[i]->getPosition());
                     }
-                    cout<<"----------------------------------------"<<endl;
+                    //Test
+                    for (int i = 0; i < 4; i++) {
+                        cout << heroes[i]->getName() << "Position = " << heroes[i]->getPosition() << endl;
+                    }
+
+                    cout << "----------------------------------------" << endl;
                 }
-
                 else if(attackOrderArray[i]->getName()=="Bone Defender #1"||attackOrderArray[i]->getName() == "Bone Defender #2"){
 
-                    int numOfSkill = rand() % 3 + 1;
-                    int target = rand() % 2 + 1;
+                    if (attackOrderArray[i]->getPosition() == 1){
+                        int numOfSkill = rand() % 3 + 1;
+                        int target = rand() % 2 + 1;
 
+                        if(numOfSkill==1){
+                            cout<<attackOrderArray[i]->getName()<<" is selected AxeBlade to attack to "<<heroes[4-target]->getName()<<endl;
 
-                    if(numOfSkill==1){
-                        cout<<attackOrderArray[i]->getName()<<" is selected AxeBlade to attack to "<<heroes[4-target]->getName()<<endl;
+                            // heroes[4-target].setHp(Skill_Axeblade.attackFunc(&attackOrderArray[i],&heroes[4-target]));
+                            Skill_Axeblade.attackFunc(attackOrderArray[i],heroes[4-target]);
+                            cout<<heroes[4-target]->getName()<<"(Hp : "<<heroes[4-target]->getHp()<<")"<<endl;
+                        }
+                        else if(numOfSkill==2){
+                            cout<<attackOrderArray[i]->getName()<<" is selected Dead Weight to attack to "<<heroes[4-target]->getName()<<endl;
 
-                        // heroes[4-target].setHp(Skill_Axeblade.attackFunc(&attackOrderArray[i],&heroes[4-target]));
-                        Skill_Axeblade.attackFunc(attackOrderArray[i],heroes[4-target]);
-                        cout<<heroes[4-target]->getName()<<"(Hp : "<<heroes[4-target]->getHp()<<")"<<endl;
+                            // heroes[4-target].setHp(Skill_Dead_Weight.attackFunc(&attackOrderArray[i],&heroes[4-target]));
+                            Skill_Dead_Weight.attackFunc(attackOrderArray[i],heroes[4-target]);
+                            cout<<heroes[4-target]->getName()<<"(Hp : "<<heroes[4-target]->getHp()<<")"<<endl;
+                        }
+                        else if(numOfSkill==3){
+                            //Move Back
+                            for(int j = 0; j <= 3; j++){
+                                if(attackOrderArray[i]->getPosition() == monsters[j]->getPosition()){
+                                    Move_Backward1.Move_Skill_Backward1(monsters[j]);
+                                    Move_Forward1.Move_Skill_Forward1(monsters[j+1]);
+
+                                    cout<< monsters[j]->getName() << " moves 1 step backward!" << endl;
+                                    cout<< monsters[j+1]->getName() << " moves 1 step forward!" << endl;
+
+                                }
+                            }
+                            sort(monsters.begin(), monsters.end(), &comparatorMonster);
+                        }
                     }
-                    else if(numOfSkill==2){
-                        cout<<attackOrderArray[i]->getName()<<" is selected Dead Weight to attack to "<<heroes[4-target]->getName()<<endl;
 
-                        // heroes[4-target].setHp(Skill_Dead_Weight.attackFunc(&attackOrderArray[i],&heroes[4-target]));
-                        Skill_Dead_Weight.attackFunc(attackOrderArray[i],heroes[4-target]);
-                        cout<<heroes[4-target]->getName()<<"(Hp : "<<heroes[4-target]->getHp()<<")"<<endl;
-                    }
-                    else if(numOfSkill==3){
-                        cout<<attackOrderArray[i]->getName()<<" is selected Knitting Bones to heal to "<<monsters[target-1]->getName()<<endl;
+                    else if(attackOrderArray[i]->getPosition() == 2){
+                        int numOfSkill = rand() % 4 + 1;
+                        int target = rand() % 2 + 1;
 
-                        cout << monsters[target-1]->getName() << "Earned Hp: " << endl;
-                        Skill_Knitting_Bones.utilityFunc(attackOrderArray[i],monsters[target-1]);
-                        cout<< monsters[target-1]->getName() << " " <<monsters[target-1]->getHp() <<endl;
+                        if(numOfSkill==1){
+                            cout<<attackOrderArray[i]->getName()<<" is selected AxeBlade to attack to "<<heroes[4-target]->getName()<<endl;
+
+                            // heroes[4-target].setHp(Skill_Axeblade.attackFunc(&attackOrderArray[i],&heroes[4-target]));
+                            Skill_Axeblade.attackFunc(attackOrderArray[i],heroes[4-target]);
+                            cout<<heroes[4-target]->getName()<<"(Hp : "<<heroes[4-target]->getHp()<<")"<<endl;
+                        }
+                        else if(numOfSkill==2){
+                            cout<<attackOrderArray[i]->getName()<<" is selected Dead Weight to attack to "<<heroes[4-target]->getName()<<endl;
+
+                            // heroes[4-target].setHp(Skill_Dead_Weight.attackFunc(&attackOrderArray[i],&heroes[4-target]));
+                            Skill_Dead_Weight.attackFunc(attackOrderArray[i],heroes[4-target]);
+                            cout<<heroes[4-target]->getName()<<"(Hp : "<<heroes[4-target]->getHp()<<")"<<endl;
+                        }
+                        else if(numOfSkill==3){
+                            //Move Back
+                            for(int j = 0; j <= 3; j++){
+                                if(attackOrderArray[i]->getPosition() == monsters[j]->getPosition()){
+                                    Move_Backward1.Move_Skill_Backward1(monsters[j]);
+                                    Move_Forward1.Move_Skill_Forward1(monsters[j+1]);
+
+                                    cout<< monsters[j]->getName() << " moves 1 step backward!" << endl;
+                                    cout<< monsters[j+1]->getName() << " moves 1 step forward!" << endl;
+
+                                }
+                            }
+                            sort(monsters.begin(), monsters.end(), &comparatorMonster);
+                        }
+                        else if(numOfSkill == 4){
+                            //Move Forward
+                            for(int j = 0; j <= 3; j++){
+                                if(attackOrderArray[i]->getPosition() == monsters[j]->getPosition()){
+                                    Move_Forward1.Move_Skill_Forward1(monsters[j]);
+                                    Move_Backward1.Move_Skill_Backward1(monsters[j-1]);
+
+                                    cout<< monsters[j]->getName() << " moves 1 step forward!" << endl;
+                                    cout<< monsters[j-1]->getName() << " moves 1 step backward!" << endl;
+
+                                }
+                            }
+                            sort(monsters.begin(), monsters.end(), &comparatorMonster);
+                        }
                     }
+
+                    else if(attackOrderArray[i]->getPosition() == 3){
+                        int numOfSkill = rand() % 4 + 1;
+                        int target = rand() % 2 + 1;
+                        if(numOfSkill==1){
+                            cout<<attackOrderArray[i]->getName()<<" is selected Dead Weight to attack to "<<heroes[4-target]->getName()<<endl;
+
+                            // heroes[4-target].setHp(Skill_Dead_Weight.attackFunc(&attackOrderArray[i],&heroes[4-target]));
+                            Skill_Dead_Weight.attackFunc(attackOrderArray[i],heroes[4-target]);
+                            cout<<heroes[4-target]->getName()<<"(Hp : "<<heroes[4-target]->getHp()<<")"<<endl;
+                        }
+                        else if(numOfSkill==2){
+                            cout<<attackOrderArray[i]->getName()<<" is selected Knitting Bones to heal to "<<monsters[target-1]->getName()<<endl;
+
+                            cout << monsters[target-1]->getName() << "Earned Hp: " << endl;
+                            Skill_Knitting_Bones.utilityFunc(attackOrderArray[i],monsters[target-1]);
+                            cout<< monsters[target-1]->getName() << " " <<monsters[target-1]->getHp() <<endl;
+                        }
+                        else if(numOfSkill==3){
+                            //Move Back
+                            for(int j = 0; j <= 3; j++){
+                                if(attackOrderArray[i]->getPosition() == monsters[j]->getPosition()){
+                                    Move_Backward1.Move_Skill_Backward1(monsters[j]);
+                                    Move_Forward1.Move_Skill_Forward1(monsters[j+1]);
+
+                                    cout<< monsters[j]->getName() << " moves 1 step backward!" << endl;
+                                    cout<< monsters[j+1]->getName() << " moves 1 step forward!" << endl;
+
+                                }
+                            }
+                            sort(monsters.begin(), monsters.end(), &comparatorMonster);
+                        }
+                        else if(numOfSkill == 4){
+                            //Move Forward
+                            for(int j = 0; j <= 3; j++){
+                                if(attackOrderArray[i]->getPosition() == monsters[j]->getPosition()){
+                                    Move_Forward1.Move_Skill_Forward1(monsters[j]);
+                                    Move_Backward1.Move_Skill_Backward1(monsters[j-1]);
+
+                                    cout<< monsters[j]->getName() << " moves 1 step forward!" << endl;
+                                    cout<< monsters[j-1]->getName() << " moves 1 step backward!" << endl;
+
+                                }
+                            }
+                            sort(monsters.begin(), monsters.end(), &comparatorMonster);
+                        }
+                    }
+                    else if(attackOrderArray[i]->getPosition() == 4 ){
+                        int numOfSkill = rand() % 2 + 1;
+                        int target = rand() % 2 + 1;
+
+                        if(numOfSkill == 1){
+                            cout<<attackOrderArray[i]->getName()<<" is selected Knitting Bones to heal to "<<monsters[target-1]->getName()<<endl;
+
+                            cout << monsters[target-1]->getName() << "Earned Hp: " << endl;
+                            Skill_Knitting_Bones.utilityFunc(attackOrderArray[i],monsters[target-1]);
+                            cout<< monsters[target-1]->getName() << " " <<monsters[target-1]->getHp() <<endl;
+                        }
+                        else if(numOfSkill == 2){
+                            //Move Forward
+                            for(int j = 0; j <= 3; j++){
+                                if(attackOrderArray[i]->getPosition() == monsters[j]->getPosition()){
+                                    Move_Forward1.Move_Skill_Forward1(monsters[j]);
+                                    Move_Backward1.Move_Skill_Backward1(monsters[j-1]);
+
+                                    cout<< monsters[j]->getName() << " moves 1 step forward!" << endl;
+                                    cout<< monsters[j-1]->getName() << " moves 1 step backward!" << endl;
+
+                                }
+                            }
+                            sort(monsters.begin(), monsters.end(), &comparatorMonster);
+                        }
+
+                    }
+                    for(int i = 0; i < 8; i++){
+                        attackOrderArray[i]->setPosition(attackOrderArray[i]->getPosition());
+                    }
+                    //Test
+                    for(int i = 0; i < 4; i++){
+                        cout << monsters[i]->getName() << "Position = " << monsters[i]->getPosition() << endl;
+                    }
+
                     cout<<"----------------------------------------"<<endl;
 
                 }
 
                 else if(attackOrderArray[i]->getName()=="Bone Soldier #1"||attackOrderArray[i]->getName() == "Bone Soldier #2"){
 
-                    int numOfSkill = rand() % 2 + 1;
-                    int target = rand() % 2 + 1;
-                    int target2 = rand() % 3 + 1;
+                    if(attackOrderArray[i]->getPosition() == 1){
+                        int numOfSkill = rand() % 2 + 1;
+                        int target = rand() % 2 + 1;
+                        int target2 = rand() % 3 + 1;
 
-                    if(numOfSkill==1){
-                        cout<<attackOrderArray[i]->getName()<<" is selected Graveyard Slash to attack to "<<heroes[4-target2]->getName()<<endl;
+                        if(numOfSkill==1){
+                            cout<<attackOrderArray[i]->getName()<<" is selected Graveyard Slash to attack to "<<heroes[4-target2]->getName()<<endl;
 
-                        // heroes[4-target].setHp(Skill_Graveyard_Slash.attackFunc(&attackOrderArray[i],&heroes[4-target]));
-                        Skill_Graveyard_Slash.attackFunc(attackOrderArray[i],heroes[4-target]);
-                        cout<<heroes[4-target]->getName()<<"(Hp : "<<heroes[4-target]->getHp()<<")"<<endl;
+                            // heroes[4-target].setHp(Skill_Graveyard_Slash.attackFunc(&attackOrderArray[i],&heroes[4-target]));
+                            Skill_Graveyard_Slash.attackFunc(attackOrderArray[i],heroes[4-target]);
+                            cout<<heroes[4-target]->getName()<<"(Hp : "<<heroes[4-target]->getHp()<<")"<<endl;
+
+                        }
+                        else if(numOfSkill == 2){
+                            //Move BACK
+                            for(int j = 0; j <= 3; j++){
+                                if(attackOrderArray[i]->getPosition() == monsters[j]->getPosition()){
+                                    Move_Backward1.Move_Skill_Backward1(monsters[j]);
+                                    Move_Forward1.Move_Skill_Forward1(monsters[j+1]);
+
+                                    cout<< monsters[j]->getName() << " moves 1 step backward!" << endl;
+                                    cout<< monsters[j+1]->getName() << " moves 1 step forward!" << endl;
+
+                                }
+                            }
+                            sort(monsters.begin(), monsters.end(), &comparatorMonster);
+                        }
 
                     }
-                    else if(numOfSkill==2){
-                        cout<<attackOrderArray[i]->getName()<<" is selected Graveyard Stumble to attack to "<<heroes[4-target]->getName()<<endl;
+                    else if(attackOrderArray[i]->getPosition() == 2 && attackOrderArray[i]->getPosition() == 3){
+                        int numOfSkill = rand() % 3 + 1;
+                        int target = rand() % 2 + 1;
+                        int target2 = rand() % 3 + 1;
 
-                        // heroes[4-target].setHp(Skill_Graveyard_Stumble.attackFunc(&attackOrderArray[i],&heroes[4-target]));
-                        Skill_Graveyard_Stumble.attackFunc(attackOrderArray[i],heroes[4-target]);
-                        cout<<heroes[4-target]->getName()<<"(Hp : "<<heroes[4-target]->getHp()<<")"<<endl;
+                        if(numOfSkill==1){
+                            cout<<attackOrderArray[i]->getName()<<" is selected Graveyard Slash to attack to "<<heroes[4-target2]->getName()<<endl;
 
-                        cout<<"And "<<attackOrderArray[i]->getName()<<" moves 1 step forward!"<<endl;
+                            // heroes[4-target].setHp(Skill_Graveyard_Slash.attackFunc(&attackOrderArray[i],&heroes[4-target]));
+                            Skill_Graveyard_Slash.attackFunc(attackOrderArray[i],heroes[4-target]);
+                            cout<<heroes[4-target]->getName()<<"(Hp : "<<heroes[4-target]->getHp()<<")"<<endl;
+                        }
+
+                        else if(numOfSkill == 2){
+                            //Move BACK
+                            for(int j = 0; j <= 3; j++){
+                                if(attackOrderArray[i]->getPosition() == monsters[j]->getPosition()){
+                                    Move_Backward1.Move_Skill_Backward1(monsters[j]);
+                                    Move_Forward1.Move_Skill_Forward1(monsters[j+1]);
+
+                                    cout<< monsters[j]->getName() << " moves 1 step backward!" << endl;
+                                    cout<< monsters[j+1]->getName() << " moves 1 step forward!" << endl;
+
+                                }
+                            }
+                            sort(monsters.begin(), monsters.end(), &comparatorMonster);
+                        }
+
+                        else if(numOfSkill == 3){
+                            //Move Forward
+                            for(int j = 0; j <= 3; j++){
+                                if(attackOrderArray[i]->getPosition() == monsters[j]->getPosition()){
+                                    Move_Forward1.Move_Skill_Forward1(monsters[j]);
+                                    Move_Backward1.Move_Skill_Backward1(monsters[j-1]);
+
+                                    cout<< monsters[j]->getName() << " moves 1 step forward!" << endl;
+                                    cout<< monsters[j-1]->getName() << " moves 1 step backward!" << endl;
+
+                                }
+                            }
+                            sort(monsters.begin(), monsters.end(), &comparatorMonster);
+                        }
+
+                    }
+                    else if(attackOrderArray[i]->getPosition() == 4){
+                        int numOfSkill = rand() % 2 + 1;
+                        int target = rand() % 2 + 1;
+                        int target2 = rand() % 3 + 1;
+
+                        if(numOfSkill==1){
+                            cout<<attackOrderArray[i]->getName()<<" is selected Graveyard Stumble to attack to "<<heroes[4-target]->getName()<<endl;
+
+                            // heroes[4-target].setHp(Skill_Graveyard_Stumble.attackFunc(&attackOrderArray[i],&heroes[4-target]));
+                            Skill_Graveyard_Stumble.attackFunc(attackOrderArray[i],heroes[4-target]);
+                            cout<<heroes[4-target]->getName()<<"(Hp : "<<heroes[4-target]->getHp()<<")"<<endl;
+
+                            cout<<"And "<<attackOrderArray[i]->getName()<<" moves 1 step forward!"<<endl;
+                        }
+                        else if(numOfSkill == 2){
+                            //Move Forward
+                            for(int j = 0; j <= 3; j++){
+                                if(attackOrderArray[i]->getPosition() == monsters[j]->getPosition()){
+                                    Move_Forward1.Move_Skill_Forward1(monsters[j]);
+                                    Move_Backward1.Move_Skill_Backward1(monsters[j-1]);
+
+                                    cout<< monsters[j]->getName() << " moves 1 step forward!" << endl;
+                                    cout<< monsters[j-1]->getName() << " moves 1 step backward!" << endl;
+
+                                }
+                            }
+                            sort(monsters.begin(), monsters.end(), &comparatorMonster);
+                        }
+
+                    }
+                    for(int i = 0; i < 8; i++){
+                        attackOrderArray[i]->setPosition(attackOrderArray[i]->getPosition());
+                    }
+                    //Test
+                    for(int i = 0; i < 4; i++){
+                        cout << monsters[i]->getName() << "Position = " << monsters[i]->getPosition() << endl;
                     }
                     cout<<"----------------------------------------"<<endl;
                 }
 
+
+
+                else if (attackOrderArray[i]->isAlive() == true && attackOrderArray[i]->isStun() == true) {
+                    cout << attackOrderArray[i]->getName() << " stunned for this round." << endl;
+                    attackOrderArray[i]->setStun(false);
+                }
+                else {
+                    cout << "Character:" << attackOrderArray[i]->getName() << " is dead." << endl;
+                }
             }
 
-            else if(attackOrderArray[i]->isAlive() == true && attackOrderArray[i]->isStun() == true){
-                cout << attackOrderArray[i]->getName() << " stunned for this round." << endl;
-                attackOrderArray[i]->setStun(false);
-            }
-            else {
-                cout << "Character:" << attackOrderArray[i]->getName() << " is dead." << endl;
+            if (heroes[0]->getHp() + heroes[1]->getHp() + heroes[2]->getHp() + heroes[3]->getHp() == 0 ||
+                monsters[0]->getHp() + monsters[1]->getHp() + monsters[2]->getHp() + monsters[3]->getHp() == 0) {
+                gameover = true;
             }
         }
-
-        if(heroes[0]->getHp()+heroes[1]->getHp()+heroes[2]->getHp()+heroes[3]->getHp() == 0 ||
-           monsters[0]->getHp()+monsters[1]->getHp()+monsters[2]->getHp()+monsters[3]->getHp() == 0){
-            gameover = true;
-        }
-
         numberOfRound++;
-
-    } while (gameover == false);
+    }
+    while (gameover == false);
 
     cout<<"!End of Game! "<<endl;
 
