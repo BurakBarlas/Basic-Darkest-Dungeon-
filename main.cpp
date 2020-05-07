@@ -185,7 +185,7 @@ public:
         baseCrit = 3;
         minDmg = 6;
         //maxDmg = 12;
-        maxDmg = 1000; //deneme
+        maxDmg = 20000;
         deathBlowResist=67;
         stunResist = 40;
     }
@@ -206,8 +206,7 @@ public:
         accMod = 0;
         baseCrit = 1;
         minDmg = 4;
-        //maxDmg = 8;
-        maxDmg = 1000; // deneme
+        maxDmg = 8;
         deathBlowResist = 77;
         stunResist = 30;
     }
@@ -314,6 +313,7 @@ public:
 
                 if(randomNumber <= stunChange && stunEffect == 1) {
                     defender->setStun(true);
+                    cout << defender->getName() << " stunned." << endl;
                 }
                 else{
                     // stun yemez
@@ -333,6 +333,7 @@ public:
 
                 if(randomNumber <= stunChange && stunEffect == 1) {
                     defender->setStun(true);
+                    cout << defender->getName() << " stunned." << endl;
                 }
                 else{
                     // stun yemez
@@ -638,7 +639,10 @@ int main() {
 
         for(int i = 7;i>=0;i--) {
             if (attackOrderArray[i]->isAlive() == true && attackOrderArray[i]->isStun() == false) {
-
+                if (heroes[0]->getHp() + heroes[1]->getHp() + heroes[2]->getHp() + heroes[3]->getHp() == 0 ||
+                    monsters[0]->getHp() + monsters[1]->getHp() + monsters[2]->getHp() + monsters[3]->getHp() == 0) {
+                    gameover = true;
+                }
                 cout << attackOrderArray[i]->getName() << "'s turn! " << "Select a skill!" << endl;
                 /*for(int j = 0;j<8;j++){
                     cout<<attackOrderArray[j].getName()<<" ";
@@ -1294,10 +1298,6 @@ int main() {
                 }
             }
 
-            if (heroes[0]->getHp() + heroes[1]->getHp() + heroes[2]->getHp() + heroes[3]->getHp() == 0 ||
-                monsters[0]->getHp() + monsters[1]->getHp() + monsters[2]->getHp() + monsters[3]->getHp() == 0) {
-                gameover = true;
-            }
         }
         numberOfRound++;
     }
