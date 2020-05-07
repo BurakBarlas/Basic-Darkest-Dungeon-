@@ -188,8 +188,8 @@ public:
         accMod = 0;
         baseCrit = 3;
         minDmg = 6;
-        //maxDmg = 12;
-        maxDmg = 1000; //deneme
+        maxDmg = 12;
+        //maxDmg = 1000; //deneme
         deathBlowResist=67;
         stunResist = 40;
     }
@@ -227,8 +227,8 @@ public:
         accMod = 0;
         baseCrit = 1;
         minDmg = 4;
-        //maxDmg = 8;
-        maxDmg = 1000; // deneme
+        maxDmg = 8;
+        //maxDmg = 1000; // deneme
         deathBlowResist = 77;
         stunResist = 30;
     }
@@ -358,11 +358,11 @@ public:
         int randomNumber = rand() % 101;
         int hitChange = baseAcc + attacker->getAccMod() - defender->getDodge();
 
-        if (hitChange >= randomNumber) { // saldirir ve crit hesaplamasi yapilir
-            double criticalChance = attacker->getBaseCrit() + critMod;
+        if (hitChange >= randomNumber) { // saldirirma hesaplamasi
+            double criticalChance = attacker->getBaseCrit() + critMod; //
             randomNumber = rand() % 101;
 
-            if (criticalChance >= randomNumber) { // crit vurur
+            if (criticalChance >= randomNumber) { // crit hesaplamasi
                 double critHit = attacker->getMaxDmg() * 1.5;
                 cout<<attacker->getName()<<", CRIT damage : "<<critHit<<endl;
                 defender->getDamage(critHit);
@@ -511,7 +511,7 @@ public:
         if (target->isAlive() == true) {
             if (maxHp) {
                 double randomNumber = rand() % (maxHp - minHp) + minHp;
-                cout << randomNumber;
+                cout << randomNumber << endl;
                 target->increaseHp(randomNumber);
             }
             if (prot) {
@@ -769,7 +769,6 @@ int main() {
 
                         }
                         cout<<"Using Dazzling Light to attack to "<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
-                        //monsters[target-1].setHp(Skill_Dazzling_Light.attackFunc(&attackOrderArray[i],&monsters[target-1]));
                         Skill_Dazzling_Light.attackFunc(attackOrderArray[i],monsters[target-1]);
                         cout<<monsters[target-1]->getName()<<"(Hp : "<<monsters[target-1]->getHp()<<")"<<endl;
                     }
@@ -784,9 +783,9 @@ int main() {
                         cout<<"Number of Target : ";
                         cin>>target;
 
-                        cout << heroes[target-1]->getName() << "Earned Hp: " << endl;
+                        cout << heroes[target-1]->getName() << "(Hp : " <<heroes[target-1]->getHp()<< ")" << " Earned Hp: ";
                         Skill_Divine_Grace.utilityFunc(attackOrderArray[i],heroes[target-1]);
-                        cout<< heroes[target-1]->getName() << " " <<heroes[target-1]->getHp() <<endl;
+                        cout<< heroes[target-1]->getName() << "(Hp : " <<heroes[target-1]->getHp()<< ")" <<endl;
 
                     }
                     else if(numberOfSkill == 4){
