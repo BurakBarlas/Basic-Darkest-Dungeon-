@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <memory>
 #include <algorithm>
+
 using namespace std;
 
 class Unit {
@@ -1303,7 +1304,7 @@ int main() {
     }
     while (gameover == false);
 
-    cout<<"!End of Game! "<<endl;
+    cout<<"End of Game! "<<endl;
 
     return 0;
 }
