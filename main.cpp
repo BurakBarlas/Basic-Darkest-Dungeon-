@@ -1309,9 +1309,9 @@ int main() {
                         }
 
                     }
-                    for (int i = 0; i < 8; i++) {
+                    /*for (int i = 0; i < 8; i++) {
                         attackOrderArray[i]->setPosition(attackOrderArray[i]->getPosition());
-                    }
+                    }*/
 
 
                     cout << "______________________________________________________________________________________________" << endl; cout << endl;
@@ -1328,13 +1328,12 @@ int main() {
                         if (numOfSkill == 1) {
                             cout << attackOrderArray[i]->getName() << " is selected Graveyard Slash to attack to " << heroes[4 - target2]->getName() << endl;
 
-                            // heroes[4-target].setHp(Skill_Graveyard_Slash.attackFunc(&attackOrderArray[i],&heroes[4-target]));
                             Skill_Graveyard_Slash.attackFunc(attackOrderArray[i], heroes[4 - target]);
                             cout << heroes[4 - target]->getName() << "(Hp : " << heroes[4 - target]->getHp() << ")" << endl;
 
                         }
                         else if (numOfSkill == 2) {
-                            //Move BACK
+                            //Move Backward
                             for (int j = 0; j <= 3; j++) {
                                 if (attackOrderArray[i]->getPosition() == monsters[j]->getPosition()) {
                                     Move_Backward1.Move_Skill_Backward1(monsters[j]);
@@ -1368,7 +1367,6 @@ int main() {
                         if (numOfSkill == 1) {
                             cout << attackOrderArray[i]->getName() << " is selected Graveyard Slash to attack to " << heroes[4 - target2]->getName() << endl;
 
-                            // heroes[4-target].setHp(Skill_Graveyard_Slash.attackFunc(&attackOrderArray[i],&heroes[4-target]));
                             Skill_Graveyard_Slash.attackFunc(attackOrderArray[i], heroes[4 - target]);
                             cout << heroes[4 - target]->getName() << "(Hp : " << heroes[4 - target]->getHp() << ")" << endl;
                         }
@@ -1435,7 +1433,6 @@ int main() {
                         if (numOfSkill == 1) {
                             cout << attackOrderArray[i]->getName() << " is selected Graveyard Stumble to attack to " << heroes[4 - target]->getName() << endl;
 
-                            // heroes[4-target].setHp(Skill_Graveyard_Stumble.attackFunc(&attackOrderArray[i],&heroes[4-target]));
                             Skill_Graveyard_Stumble.attackFunc(attackOrderArray[i], heroes[4 - target]);
                             cout << heroes[4 - target]->getName() << "(Hp : " << heroes[4 - target]->getHp() << ")" << endl;
 
@@ -1513,6 +1510,13 @@ int main() {
     } while (gameover == false);
 
     cout << "End of Game! " << endl;
+
+    if (heroes[0]->getHp() + heroes[1]->getHp() + heroes[2]->getHp() + heroes[3]->getHp() == 0 ) {
+        cout << "Monsters Won the Battle!" << endl;
+    }
+    else if (monsters[0]->getHp() + monsters[1]->getHp() + monsters[2]->getHp() + monsters[3]->getHp() == 0) {
+        cout << "Heroes Won the Battle!" << endl;
+    }
 
     return 0;
 }
