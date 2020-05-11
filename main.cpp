@@ -684,10 +684,10 @@ int main() {
                     
                     if (attackOrderArray[i]->getPosition() == 1) {
                         cout << "1 : Mace Bash (Attack)" << endl;
-                        cout << "2 : Move Backward 1 (Move)" << endl;
+                        cout << "6 : Move Backward 1 (Move)" << endl;
                         cout << "Number of Skill : ";
                         cin >> numberOfSkill;
-                        if (numberOfSkill != 1 && numberOfSkill != 2) {
+                        if (numberOfSkill != 1 && numberOfSkill != 6) {
                             cout << "Number of Skill selected 1 automatically because your selection is not an option! "
                                 << endl;
                             numberOfSkill = 1;
