@@ -1440,6 +1440,27 @@ int main() {
                             cout << heroes[4 - target]->getName() << "(Hp : " << heroes[4 - target]->getHp() << ")" << endl;
 
                             cout << "And " << attackOrderArray[i]->getName() << " moves 1 step forward!" << endl;
+                            for (int j = 0; j <= 3; j++) {
+                                if (attackOrderArray[i]->getPosition() == monsters[j]->getPosition()) {
+                                    Move_Forward1.Move_Skill_Forward1(monsters[j]);
+                                    Move_Backward1.Move_Skill_Backward1(monsters[j - 1]);
+
+                                    cout << monsters[j]->getName() << " moves 1 step forward!" << endl;
+                                    cout << monsters[j - 1]->getName() << " moves 1 step backward!" << endl;
+
+                                }
+                            }
+                            sort(monsters.begin(), monsters.end(), &comparatorMonster);
+                            for (int k = 0; k <= 3; k++) {
+                                if (k != 3) {
+                                    cout << monsters[k]->getName() << ",";
+                                }
+                                else {
+                                    cout << monsters[k]->getName();
+                                }
+                            }
+                            cout << endl;
+                            cout << endl;
                         }
                         else if (numOfSkill == 2) {
                             //Move Forward
