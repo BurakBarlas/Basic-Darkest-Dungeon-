@@ -12,7 +12,7 @@ using namespace std;
 class Unit {
 protected:
     string name;
-    string type = "UNK";
+    string type;
     int position;
     int maxHp = 0;
     int hp;
