@@ -84,15 +84,8 @@ public:
         }
     }
 
-    void setName(string nam) {
-        name = nam;
-    }
-
     void setProt(int prot) {
         this->prot = prot;
-    }
-    void setSpeed(int sped) {
-        speed = sped;
     }
 
     void setTemporalSpeed(int temporalSpeed) {
@@ -101,14 +94,6 @@ public:
 
     void setPosition(int pst) {
         position = pst;
-    }
-
-    void getMaxHp(int maxHp) {
-        this->maxHp = maxHp;
-    }
-
-    void setHp(int hpp) {
-        hp = hpp;
     }
 
     bool isAlive() {
@@ -132,6 +117,9 @@ public:
     }
 
     void getDamage(int damage) {
+        if(damage = 0){
+            damage = 1;
+        }
         hp = hp - damage;
         if (hp <= 0) {
             hp = 0;
@@ -146,11 +134,6 @@ protected:
 public:
     Hero() {}
 
-    void printInfo() {
-
-        cout << maxHp;
-
-    }
     void attack() {
 
     }
@@ -618,10 +601,6 @@ int main() {
             }
         }
 
-        for (int i = 0; i < 8; i++) {
-            attackOrderArray[i]->setPosition(attackOrderArray[i]->getPosition());
-        }
-
         for (int i = 7; i >= 0; i--) {
 
             int actRandomChance;
@@ -818,8 +797,8 @@ int main() {
                         cout << endl;
                         if (target != 1 && target != 2) {
                             cout
-                                << "Number of Target selected 1 automatically because your selection is not an option! "
-                                << endl;
+                                    << "Number of Target selected 1 automatically because your selection is not an option! "
+                                    << endl;
                             target = 1;
 
                         }
@@ -836,10 +815,10 @@ int main() {
                         }
                         if (monsters[0]->isAlive() == true || monsters[1]->isAlive() == true) {
                             cout << "Using Mace Bash to attack to " << monsters[target - 1]->getName() << "(Hp : "
-                                << monsters[target - 1]->getHp() << ")" << endl;
+                                 << monsters[target - 1]->getHp() << ")" << endl;
                             Skill_Mace_Bash.attackFunc(attackOrderArray[i], monsters[target - 1]);
                             cout << monsters[target - 1]->getName() << "(Hp : " << monsters[target - 1]->getHp() << ")"
-                                << endl;
+                                 << endl;
                         }
                         else {
                             cout << "There is no living target you can attack , end of your turn !" << endl;
@@ -857,8 +836,8 @@ int main() {
                         cout << endl;
                         if (target != 1 && target != 2 && target != 3) {
                             cout
-                                << "Number of Target selected 1 automatically because your selection is not an option! "
-                                << endl;
+                                    << "Number of Target selected 1 automatically because your selection is not an option! "
+                                    << endl;
                             target = 1;
 
                         }
@@ -875,10 +854,10 @@ int main() {
                         }
                         if (monsters[0]->isAlive() == true || monsters[1]->isAlive() == true || monsters[2]->isAlive() == true) {
                             cout << "Using Dazzling Light to attack to " << monsters[target - 1]->getName() << "(Hp : "
-                                << monsters[target - 1]->getHp() << ")" << endl;
+                                 << monsters[target - 1]->getHp() << ")" << endl;
                             Skill_Dazzling_Light.attackFunc(attackOrderArray[i], monsters[target - 1]);
                             cout << monsters[target - 1]->getName() << "(Hp : " << monsters[target - 1]->getHp() << ")"
-                                << endl;
+                                 << endl;
                         }
                         else {
                             cout << "There is no living target you can attack , end of your turn !" << endl;
@@ -897,7 +876,7 @@ int main() {
                         cout << endl;
                         if (target != 1 && target != 2 && target != 3 && target != 4) {
                             cout << "Number of Ally selected 1 automatically because your selection is not an option! "
-                                << endl;
+                                 << endl;
                             target = 1;
 
                         }
@@ -1131,8 +1110,8 @@ int main() {
                         cout << endl;
                         if (target != 1 && target != 2) {
                             cout
-                                << "Number of Target selected 1 automatically because your selection is not an option! "
-                                << endl;
+                                    << "Number of Target selected 1 automatically because your selection is not an option! "
+                                    << endl;
                             target = 1;
 
                         }
@@ -1149,11 +1128,11 @@ int main() {
                         }
                         if (monsters[0]->isAlive() == true || monsters[1]->isAlive() == true) {
                             cout << "Using Smite on " << monsters[target - 1]->getName() << "(Hp : "
-                                << monsters[target - 1]->getHp() << ")" << endl;
+                                 << monsters[target - 1]->getHp() << ")" << endl;
 
                             Skill_Smite.attackFunc(attackOrderArray[i], monsters[target - 1]);
                             cout << monsters[target - 1]->getName() << "(Hp : " << monsters[target - 1]->getHp() << ")"
-                                << endl;
+                                 << endl;
                         }
                         else {
                             cout << "There is no living target you can attack , end of your turn !" << endl;
@@ -1170,8 +1149,8 @@ int main() {
                         cout << endl;
                         if (target != 1 && target != 2) {
                             cout
-                                << "Number of Target selected 1 automatically because your selection is not an option! "
-                                << endl;
+                                    << "Number of Target selected 1 automatically because your selection is not an option! "
+                                    << endl;
                             target = 1;
 
                         }
@@ -1188,10 +1167,10 @@ int main() {
                         }
                         if (monsters[0]->isAlive() == true || monsters[1]->isAlive() == true) {
                             cout << "Using Stunning Blow on " << monsters[target - 1]->getName() << "(Hp : "
-                                << monsters[target - 1]->getHp() << ")" << endl;
+                                 << monsters[target - 1]->getHp() << ")" << endl;
                             Skill_Stunning_Blow.attackFunc(attackOrderArray[i], monsters[target - 1]);
                             cout << monsters[target - 1]->getName() << "(Hp : " << monsters[target - 1]->getHp() << ")"
-                                << endl;
+                                 << endl;
                         }
                         else {
                             cout << "There is no living target you can attack , end of your turn !" << endl;
@@ -1214,8 +1193,8 @@ int main() {
                         cout << endl;
                         if (target != 2 && target != 3 && target != 4) {
                             cout
-                                << "Number of Target selected 2 automatically because your selection is not an option! "
-                                << endl;
+                                    << "Number of Target selected 2 automatically because your selection is not an option! "
+                                    << endl;
                             target = 2;
 
                         }
@@ -1232,10 +1211,10 @@ int main() {
                         }
                         if (monsters[2]->isAlive() == true || monsters[1]->isAlive() == true || monsters[3]->isAlive() == true) {
                             cout << "Using Holy Lance to attack to " << monsters[target - 1]->getName() << "(Hp : "
-                                << monsters[target - 1]->getHp() << ")" << endl;
+                                 << monsters[target - 1]->getHp() << ")" << endl;
                             Skill_Holy_Lance.attackFunc(attackOrderArray[i], monsters[target - 1]);
                             cout << monsters[target - 1]->getName() << "(Hp : " << monsters[target - 1]->getHp() << ")"
-                                << endl;
+                                 << endl;
 
                             for (int j = 0; j <= 3; j++) {
                                 if (attackOrderArray[i]->getPosition() == heroes[j]->getPosition()) {
