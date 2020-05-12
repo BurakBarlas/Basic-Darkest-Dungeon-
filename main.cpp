@@ -327,16 +327,6 @@ public:
 
         // return defender->getHp();
     }
-    int getDmgMod() {
-        return dmgMod;
-    }
-    int getBaseAcc() {
-        return baseAcc;
-    }
-    double getCritMod() {
-        return critMod;
-    }
-
 };
 
 class Smite : public AttackSkill {
@@ -563,9 +553,7 @@ int main() {
     do {
         cout << "                                       _______________" << endl;
         cout << "______________________________________| R O U N D   " << numberOfRound << " |_______________________________________" << endl;
-        //
         cout << endl;
-
 
         int randSpeed;
         shared_ptr<Unit>temp;
@@ -577,14 +565,12 @@ int main() {
 
         for (int i = 0; i < 7; i++) {
             for (int j = 0; j < 7; j++) {
-
                 if (attackOrderArray[j]->getTemporalSpeed() >
                     attackOrderArray[j + 1]->getTemporalSpeed()) {
 
                     temp = attackOrderArray[j];
                     attackOrderArray[j] = attackOrderArray[j + 1];
                     attackOrderArray[j + 1] = temp;
-
                 }
             }
         }
