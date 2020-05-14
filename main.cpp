@@ -703,7 +703,7 @@ public:
         cout << targets[target - 1]->getName() << " is healed by ";
         utilityFunc(healer, targets[target - 1]);
         cout << endl;
-        cout << targets[target - 1]->getName() << " " << targets[target - 1]->getHp() << endl;
+        cout << targets[target - 1]->getName() << "(Hp : " << targets[target - 1]->getHp()<< ")" << endl;
 
         int randomNumber = rand() % 2 + 2;
 
