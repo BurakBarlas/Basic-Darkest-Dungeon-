@@ -261,7 +261,6 @@ public:
                  << defender[target - 1]->getHp() << ")" << endl;
 
             attackFunc(attacker, defender[target - 1]);
-            cout << defender[target - 1]->getName() << "(Hp : " << defender[target - 1]->getHp() << ")"<< endl;
         }
         else {
             cout << "There is no living target you can attack , end of your turn !" << endl;
