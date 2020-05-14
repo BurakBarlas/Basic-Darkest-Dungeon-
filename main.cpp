@@ -352,7 +352,7 @@ public:
         }
         if (defender[2]->isAlive() == true || defender[1]->isAlive() == true || defender[3]->isAlive() == true) {
             cout << "Using Holy Lance to attack to " << defender[target - 1]->getName()
-                << "(Hp : " << defender[target - 1]->getHp() << ")" << endl;
+                 << "(Hp : " << defender[target - 1]->getHp() << ")" << endl;
             attackFunc(attacker, defender[target - 1]);
             cout << defender[target - 1]->getName() << "(Hp : " << defender[target - 1]->getHp() << ")" << endl;
 
@@ -478,7 +478,7 @@ public:
         }
         if (defenders[0]->isAlive() == true || defenders[1]->isAlive() == true || defenders[2]->isAlive() == true) {
             cout << "Using Graveyard Slash to attack to " << defenders[4 - target]->getName() << "(Hp : "
-                 << defenders[target - 1]->getHp() << ")" << endl;
+                 << defenders[4 - target]->getHp() << ")" << endl;
             attackFunc(attacker, defenders[4 - target]);
         }
         else {
@@ -510,7 +510,7 @@ public:
         }
         if (defenders[0]->isAlive() == true || defenders[1]->isAlive() == true) {
             cout << "Using Graveyard Stumble to attack to " << defenders[4 - target]->getName() << "(Hp : "
-                 << defenders[target - 1]->getHp() << ")" << endl;
+                 << defenders[4 - target]->getHp() << ")" << endl;
             attackFunc(attacker, defenders[4 - target]);
         }
         else {
@@ -544,7 +544,7 @@ public:
         }
         if (defenders[0]->isAlive() == true || defenders[1]->isAlive() == true) {
             cout << "Using AxeBlade to attack to " << defenders[4 - target]->getName() << "(Hp : "
-                 << defenders[target - 1]->getHp() << ")" << endl;
+                 << defenders[4 - target]->getHp() << ")" << endl;
             attackFunc(attacker, defenders[4 - target]);
         }
         else {
@@ -577,7 +577,7 @@ public:
         }
         if (defenders[0]->isAlive() == true || defenders[1]->isAlive() == true) {
             cout << "Using Dead Weight to attack to " << defenders[4 - target]->getName() << "(Hp : "
-                 << defenders[target - 1]->getHp() << ")" << endl;
+                 << defenders[4 - target]->getHp() << ")" << endl;
             attackFunc(attacker, defenders[4 - target]);
         }
         else {
